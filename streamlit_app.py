@@ -1,14 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import locale
-
-# Tenta configurar o locale para português
-try:
-    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-except:
-    # Se não funcionar (Windows/Streamlit Cloud), usa o padrão do sistema
-    pass
 
 st.title("📄 Proposta Comercial Interativa")
 
@@ -128,15 +120,20 @@ st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
 
 # ----------------------------
-# Data da proposta ao final em português usando strftime
+# Data da proposta ao final em português (manual)
 # ----------------------------
-data_formatada = data_proposta.strftime("%d de %B de %Y")
-st.markdown(f"**Rio de Janeiro, {data_formatada}.**")
+meses_pt = ["janeiro", "fevereiro", "março", "abril", "maio", "junho",
+            "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
+
+dia = data_proposta.day
+mes = meses_pt[data_proposta.month - 1]
+ano = data_proposta.year
+
+st.markdown(f"**Rio de Janeiro, {dia} de {mes} de {ano}.**")
 
 # ----------------------------
 # Espaço para assinatura
 # ----------------------------
-st.markdown("\n\n\n")  # Espaço em branco para assinatura
-st.markdown("_________________________________________")  # Linha para assinatura
+st.markdown("\n\n\n")  # Espaço em branco
 st.markdown("**Gustavo Luiz Freitas de Sousa**")  # Nome
 st.markdown("CPF: 148.288.697-94")  # CPF
