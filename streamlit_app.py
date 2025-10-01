@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from babel.dates import format_date  # Para formatar data em português
 
 st.title("📄 Proposta Comercial Interativa")
 
@@ -18,7 +19,7 @@ validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 # A/C e dados fixos da empresa
 # ----------------------------
 st.markdown(f"**A/C: {cliente}**")
-st.markdown("### DADOS DA EMPRESA")
+st.markdown("### Dados da Empresa")
 st.markdown("""
 **Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
 **CNPJ:** 41.640.044/0001-63  
@@ -29,13 +30,13 @@ st.markdown("""
 **CEP:** 20521-260
 """)
 
-st.markdown("### DADOS PARA CONTATO")
+st.markdown("### Dados para Contato")
 st.markdown("""
 **E-mail:** gustavo_lfs@hotmail.com  
 **Telefone:** (21) 996913090
 """)
 
-st.markdown("### DADOS BANCÁRIOS")
+st.markdown("### Dados Bancários")
 st.markdown("""
 **Banco:** Inter  
 **Agência:** 0001  
@@ -120,7 +121,15 @@ st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
 
 # ----------------------------
-# Data da proposta ao final
+# Data da proposta ao final em português
 # ----------------------------
-data_formatada = data_proposta.strftime("%d de %B de %Y")
+data_formatada = format_date(data_proposta, format="d 'de' MMMM 'de' y", locale='pt_BR')
 st.markdown(f"**Rio de Janeiro, {data_formatada}.**")
+
+# ----------------------------
+# Espaço para assinatura
+# ----------------------------
+st.markdown("\n\n\n")  # Espaço em branco para assinatura
+st.markdown("_________________________________________")  # Linha para assinatura
+st.markdown("**Gustavo Luiz Freitas de Sousa**")  # Nome
+st.markdown("CPF: 148.288.697-94")  # CPF
