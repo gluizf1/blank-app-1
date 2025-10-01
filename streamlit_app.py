@@ -4,7 +4,7 @@ from datetime import datetime
 from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 
@@ -140,43 +140,30 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF final
+# Função para gerar PDF com logo
 # ----------------------------
-def gerar_pdf():
+def gerar_pdf_com_logo(caminho_logo="logo.png"):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
 
     estilos = getSampleStyleSheet()
-    estilos.add(ParagraphStyle(
-        name="CenterTitle",
-        alignment=TA_CENTER,
-        fontSize=20,
-        leading=24,
-        spaceAfter=20,
-        fontName="Helvetica-Bold"
-    ))
-    estilos.add(ParagraphStyle(
-        name="SectionTitle",
-        fontSize=14,
-        leading=18,
-        spaceAfter=10,
-        fontName="Helvetica-Bold"  # Títulos das seções em negrito
-    ))
-    estilos.add(ParagraphStyle(
-        name="ACStyle",
-        fontSize=14,
-        leading=20,
-        spaceAfter=10,
-        fontName="Helvetica"  # A/C normal
-    ))
-    estilos.add(ParagraphStyle(
-        name="CellStyle",
-        fontSize=10,
-        leading=12
-    ))
+    estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=20, leading=24, spaceAfter=20, fontName="Helvetica-Bold"))
+    estilos.add(ParagraphStyle(name="SectionTitle", fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))
+    estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=10, fontName="Helvetica"))
+    estilos.add(ParagraphStyle(name="CellStyle", fontSize=10, leading=12))
 
-    # Cabeçalho
+    # Logo
+    try:
+        logo = Image(caminho_logo)
+        logo.drawHeight = 50
+        logo.drawWidth = 150
+        elementos.append(logo)
+        elementos.append(Spacer(1, 15))
+    except:
+        elementos.append(Spacer(1, 65))
+
+    # Cabeçalho e A/C
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
     elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 15))
@@ -220,7 +207,7 @@ def gerar_pdf():
             nova_linha = [Paragraph(str(item), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        col_widths = [150, 70, 100, 150, 80]  # Quantidade ajustada
+        col_widths = [150, 70, 100, 150, 80]
 
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
         estilo = TableStyle([
@@ -258,9 +245,9 @@ def gerar_pdf():
     return buffer
 
 # ----------------------------
-# Botão de download do PDF
+# Botão para download do PDF
 # ----------------------------
-pdf_buffer = gerar_pdf()
+pdf_buffer = gerar_pdf_com_logo(caminho_logo="logo.png")
 st.download_button(
     label="📥 Baixar Proposta em PDF",
     data=pdf_buffer,
