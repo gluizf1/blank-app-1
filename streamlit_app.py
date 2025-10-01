@@ -1,7 +1,14 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from babel.dates import format_date  # Para formatar data em português
+import locale
+
+# Tenta configurar o locale para português
+try:
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+except:
+    # Se não funcionar (Windows/Streamlit Cloud), usa o padrão do sistema
+    pass
 
 st.title("📄 Proposta Comercial Interativa")
 
@@ -121,9 +128,9 @@ st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
 
 # ----------------------------
-# Data da proposta ao final em português
+# Data da proposta ao final em português usando strftime
 # ----------------------------
-data_formatada = format_date(data_proposta, format="d 'de' MMMM 'de' y", locale='pt_BR')
+data_formatada = data_proposta.strftime("%d de %B de %Y")
 st.markdown(f"**Rio de Janeiro, {data_formatada}.**")
 
 # ----------------------------
