@@ -10,6 +10,8 @@ st.sidebar.header("Detalhes da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente", "Cliente Exemplo")
 data_proposta = st.sidebar.date_input("Data da Proposta")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
+prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
+prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 
 # Mostrar cliente logo abaixo do título
 st.markdown(f"**A/C: {cliente}**")
@@ -80,3 +82,13 @@ st.dataframe(df_final)
 # Total geral
 total_geral = df_final["Total (R$)"].sum()
 st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
+
+# ----------------------------
+# Condições Comerciais
+# ----------------------------
+st.markdown("---")
+st.subheader("Condições Comerciais")
+st.markdown(f"- **Validade da Proposta:** {validade_proposta}")
+st.markdown(f"- **Prazo de Pagamento:** {prazo_pagamento}")
+st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
+st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
