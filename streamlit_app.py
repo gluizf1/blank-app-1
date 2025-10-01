@@ -14,8 +14,34 @@ prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
-# Mostrar cliente logo abaixo do título
+# ----------------------------
+# A/C e dados fixos da empresa
+# ----------------------------
 st.markdown(f"**A/C: {cliente}**")
+st.markdown("### DADOS DA EMPRESA")
+st.markdown("""
+**Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
+**CNPJ:** 41.640.044/0001-63  
+**IE:** 33.822.412.281  
+**IM:** 1.304.930-0  
+**Endereço:** Rua Henrique Fleiuss, 444 - Tijuca  
+**Cidade/UF:** Rio de Janeiro / RJ  
+**CEP:** 20521-260
+""")
+
+st.markdown("### DADOS PARA CONTATO")
+st.markdown("""
+**E-mail:** gustavo_lfs@hotmail.com  
+**Telefone:** (21) 996913090
+""")
+
+st.markdown("### DADOS BANCÁRIOS")
+st.markdown("""
+**Banco:** Inter  
+**Agência:** 0001  
+**Conta:** 12174848-0  
+**PIX:** 41.640.044/0001-63
+""")
 
 # ----------------------------
 # Inicializa lista de produtos no session_state
