@@ -221,7 +221,9 @@ def gerar_pdf():
             nova_linha = [Paragraph(str(item), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        col_widths = [150, 50, 100, 150, 80]
+        # Ajustando a largura da coluna "Quantidade" para caber o título
+        col_widths = [150, 70, 100, 150, 80]  # Aumentei a largura da coluna Quantidade
+
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
 
         estilo = TableStyle([
