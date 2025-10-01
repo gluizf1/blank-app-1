@@ -1,21 +1,25 @@
-import streamlit as st
+vimport streamlit as st
 import pandas as pd
 
-st.title("📄 Proposta Comercial Interativa")
-
 # ----------------------------
-# Informações do cliente
+# Informações do cliente e data
 # ----------------------------
 st.sidebar.header("Detalhes da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente", "Cliente Exemplo")
-data_proposta = st.sidebar.date_input("Data da Proposta")
-validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
+data_proposta = st.sidebar.date_input("Data da Proposta", pd.to_datetime("2025-10-01"))
 prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 
+# Colunas para colocar a data no canto superior direito
+col1, col2 = st.columns([3, 1])
+with col2:
+    st.markdown(f"**Data da Proposta: {data_proposta}**")
+
+# Título principal
+st.title("📄 Proposta Comercial Interativa")
+
 # Mostrar cliente logo abaixo do título
 st.markdown(f"**A/C: {cliente}**")
-st.markdown(f"**Data da Proposta:** {data_proposta}  |  **Validade:** {validade_proposta}")
 
 # ----------------------------
 # Inicializa lista de produtos no session_state
@@ -88,7 +92,7 @@ st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
 # ----------------------------
 st.markdown("---")
 st.subheader("Condições Comerciais")
-st.markdown(f"- **Validade da Proposta:** {validade_proposta}")
+st.markdown(f"- **Validade da Proposta:** {st.sidebar.text_input('Validade da Proposta', '30 dias')}")
 st.markdown(f"- **Prazo de Pagamento:** {prazo_pagamento}")
 st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
