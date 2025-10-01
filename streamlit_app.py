@@ -23,7 +23,7 @@ validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 # ----------------------------
 # A/C e dados fixos da empresa
 # ----------------------------
-st.markdown(f"**A/C: {cliente}**")
+st.markdown(f"**A/C {cliente}**")
 st.markdown("### Dados da Empresa")
 st.markdown("""
 **Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
@@ -140,22 +140,25 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF profissional com cabeçalho cinza claro
+# Função para gerar PDF com títulos padronizados e A/C destacado
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
+
     estilos = getSampleStyleSheet()
-    estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=18, leading=22, spaceAfter=20))
+    estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=20, leading=24, spaceAfter=20, fontName="Helvetica-Bold"))  # Título principal
+    estilos.add(ParagraphStyle(name="SectionTitle", fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))  # Títulos de seção
+    estilos.add(ParagraphStyle(name="ACStyle", fontSize=16, leading=20, spaceAfter=10, fontName="Helvetica-Bold"))  # A/C e cliente
 
     # Cabeçalho
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
-    elementos.append(Paragraph(f"A/C: {cliente}", estilos["Normal"]))
+    elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 15))
 
     # Dados da empresa
-    elementos.append(Paragraph("<b>Dados da Empresa</b>", estilos["Heading3"]))
+    elementos.append(Paragraph("Dados da Empresa", estilos["SectionTitle"]))
     dados_empresa = [
         "Nome da Empresa: GUSTAVO LUIZ FREITAS DE SOUSA",
         "CNPJ: 41.640.044/0001-63",
@@ -170,21 +173,21 @@ def gerar_pdf():
     elementos.append(Spacer(1, 10))
 
     # Dados de contato
-    elementos.append(Paragraph("<b>Dados para Contato</b>", estilos["Heading3"]))
+    elementos.append(Paragraph("Dados para Contato", estilos["SectionTitle"]))
     contato = ["E-mail: gustavo_lfs@hotmail.com", "Telefone: (21) 996913090"]
     for linha in contato:
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 10))
 
     # Dados bancários
-    elementos.append(Paragraph("<b>Dados Bancários</b>", estilos["Heading3"]))
+    elementos.append(Paragraph("Dados Bancários", estilos["SectionTitle"]))
     bancarios = ["Banco: Inter", "Agência: 0001", "Conta: 12174848-0", "PIX: 41.640.044/0001-63"]
     for linha in bancarios:
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
     # Seção Itens da Proposta
-    elementos.append(Paragraph("<b>Itens da Proposta</b>", estilos["Heading2"]))
+    elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
     # Tabela de produtos com cabeçalho cinza claro
@@ -195,7 +198,7 @@ def gerar_pdf():
             ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),   # Grades internas
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),     # Cabeçalho em negrito
-            ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),   # Fundo cinza claro só no cabeçalho
+            ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),   # Cabeçalho cinza claro
         ]))
         elementos.append(tabela)
         elementos.append(Spacer(1, 10))
@@ -203,7 +206,7 @@ def gerar_pdf():
         elementos.append(Spacer(1, 20))
 
     # Condições comerciais
-    elementos.append(Paragraph("<b>Condições Comerciais</b>", estilos["Heading3"]))
+    elementos.append(Paragraph("Condições Comerciais", estilos["SectionTitle"]))
     elementos.append(Paragraph(f"Validade da Proposta: {validade_proposta}", estilos["Normal"]))
     elementos.append(Paragraph(f"Prazo de Pagamento: {prazo_pagamento}", estilos["Normal"]))
     elementos.append(Paragraph(f"Prazo de Entrega: {prazo_entrega}", estilos["Normal"]))
