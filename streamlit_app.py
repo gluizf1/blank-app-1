@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Título do app
-st.title("📄 Proposta Comercial Interativa")
+st.title("Proposta Comercial")
 
 # Dados iniciais da proposta
 st.sidebar.header("Informações da Proposta")
@@ -11,7 +11,7 @@ data_proposta = st.sidebar.date_input("Data da Proposta")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
 # Tabela de produtos (editável)
-st.header("Itens da Proposta")
+st.header("Itens")
 default_data = {
     "Produto": ["Produto A", "Produto B"],
     "Quantidade": [1, 2],
