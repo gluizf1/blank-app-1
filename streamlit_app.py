@@ -6,10 +6,14 @@ st.title("📄 Proposta Comercial Interativa")
 # ----------------------------
 # Informações do cliente
 # ----------------------------
-st.sidebar.header("Informações da Proposta")
+st.sidebar.header("Detalhes da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente", "Cliente Exemplo")
 data_proposta = st.sidebar.date_input("Data da Proposta")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
+
+# Mostrar cliente logo abaixo do título
+st.markdown(f"**A/C: {cliente}**")
+st.markdown(f"**Data da Proposta:** {data_proposta}  |  **Validade:** {validade_proposta}")
 
 # ----------------------------
 # Inicializa lista de produtos no session_state
@@ -29,15 +33,6 @@ def adicionar_produto():
 def remover_produto():
     if st.session_state.produtos:
         st.session_state.produtos.pop()
-
-# ----------------------------
-# Botões de adicionar/remover
-# ----------------------------
-col1, col2 = st.columns(2)
-with col1:
-    st.button("➕ Adicionar Produto", on_click=adicionar_produto)
-with col2:
-    st.button("➖ Remover Produto", on_click=remover_produto)
 
 # ----------------------------
 # Editar produtos
@@ -67,6 +62,15 @@ for i, item in enumerate(st.session_state.produtos):
 st.session_state.produtos = produtos_editados
 
 # ----------------------------
+# Botões de adicionar/remover abaixo do último produto
+# ----------------------------
+col1, col2 = st.columns(2)
+with col1:
+    st.button("➕ Adicionar Produto", on_click=adicionar_produto)
+with col2:
+    st.button("➖ Remover Produto", on_click=remover_produto)
+
+# ----------------------------
 # Mostrar tabela final
 # ----------------------------
 df_final = pd.DataFrame(produtos_editados)
@@ -76,12 +80,3 @@ st.dataframe(df_final)
 # Total geral
 total_geral = df_final["Total (R$)"].sum()
 st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
-
-# ----------------------------
-# Detalhes do cliente
-# ----------------------------
-st.markdown("---")
-st.subheader("Detalhes do Cliente")
-st.markdown(f"- **Cliente:** {cliente}")
-st.markdown(f"- **Data da Proposta:** {data_proposta}")
-st.markdown(f"- **Validade:** {validade_proposta}")
