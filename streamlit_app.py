@@ -1,6 +1,13 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from io import BytesIO
+
+# ReportLab para PDF
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 
 st.title("📄 Proposta Comercial Interativa")
 
@@ -44,7 +51,7 @@ st.markdown("""
 """)
 
 # ----------------------------
-# Inicializa lista de produtos no session_state
+# Inicializa lista de produtos
 # ----------------------------
 if "produtos" not in st.session_state:
     st.session_state.produtos = [
@@ -52,9 +59,6 @@ if "produtos" not in st.session_state:
         {"Produto": "Produto B", "Quantidade": 2, "Preço Unitário (R$)": 150.0, "Observações": ""}
     ]
 
-# ----------------------------
-# Funções para adicionar/remover produtos
-# ----------------------------
 def adicionar_produto():
     st.session_state.produtos.append({"Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""})
 
@@ -86,11 +90,10 @@ for i, item in enumerate(st.session_state.produtos):
         "Total (R$)": total
     })
 
-# Atualiza session_state
 st.session_state.produtos = produtos_editados
 
 # ----------------------------
-# Botões de adicionar/remover abaixo do último produto
+# Botões de adicionar/remover
 # ----------------------------
 col1, col2 = st.columns(2)
 with col1:
@@ -99,13 +102,12 @@ with col2:
     st.button("➖ Remover Produto", on_click=remover_produto)
 
 # ----------------------------
-# Mostrar tabela final
+# Resumo da proposta
 # ----------------------------
 df_final = pd.DataFrame(produtos_editados)
 st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
 
-# Total geral
 total_geral = df_final["Total (R$)"].sum()
 st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
 
@@ -120,7 +122,7 @@ st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
 
 # ----------------------------
-# Data formatada manualmente em PT-BR
+# Data em PT-BR (manual)
 # ----------------------------
 meses_pt = {
     1: "janeiro", 2: "fevereiro", 3: "março", 4: "abril",
@@ -132,13 +134,80 @@ mes = meses_pt[data_proposta.month]
 ano = data_proposta.year
 data_formatada = f"{dia} de {mes} de {ano}"
 
-# Espaço antes da data
 st.markdown("\n\n\n")
 st.markdown(f"**Rio de Janeiro, {data_formatada}.**")
-
-# ----------------------------
-# Espaço para assinatura
-# ----------------------------
 st.markdown("\n\n\n")
 st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
+
+# ----------------------------
+# Função para gerar PDF
+# ----------------------------
+def gerar_pdf():
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elementos = []
+    estilos = getSampleStyleSheet()
+
+    # Cabeçalho
+    elementos.append(Paragraph(f"Proposta Comercial", estilos["Title"]))
+    elementos.append(Spacer(1, 20))
+    elementos.append(Paragraph(f"A/C: {cliente}", estilos["Normal"]))
+    elementos.append(Spacer(1, 10))
+
+    # Dados fixos
+    elementos.append(Paragraph("<b>Dados da Empresa</b>", estilos["Heading3"]))
+    elementos.append(Paragraph("Nome da Empresa: GUSTAVO LUIZ FREITAS DE SOUSA", estilos["Normal"]))
+    elementos.append(Paragraph("CNPJ: 41.640.044/0001-63", estilos["Normal"]))
+    elementos.append(Paragraph("IE: 33.822.412.281", estilos["Normal"]))
+    elementos.append(Paragraph("IM: 1.304.930-0", estilos["Normal"]))
+    elementos.append(Paragraph("Endereço: Rua Henrique Fleiuss, 444 - Tijuca", estilos["Normal"]))
+    elementos.append(Paragraph("Cidade/UF: Rio de Janeiro / RJ", estilos["Normal"]))
+    elementos.append(Paragraph("CEP: 20521-260", estilos["Normal"]))
+    elementos.append(Spacer(1, 10))
+
+    # Produtos
+    if not df_final.empty:
+        tabela = Table(
+            [list(df_final.columns)] + df_final.values.tolist(),
+            colWidths=[100, 70, 100, 100, 80]
+        )
+        tabela.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.grey),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.whitesmoke),
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("GRID", (0,0), (-1,-1), 0.5, colors.black),
+        ]))
+        elementos.append(tabela)
+        elementos.append(Spacer(1, 10))
+        elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
+        elementos.append(Spacer(1, 20))
+
+    # Condições comerciais
+    elementos.append(Paragraph("<b>Condições Comerciais</b>", estilos["Heading3"]))
+    elementos.append(Paragraph(f"Validade da Proposta: {validade_proposta}", estilos["Normal"]))
+    elementos.append(Paragraph(f"Prazo de Pagamento: {prazo_pagamento}", estilos["Normal"]))
+    elementos.append(Paragraph(f"Prazo de Entrega: {prazo_entrega}", estilos["Normal"]))
+    elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["Normal"]))
+    elementos.append(Spacer(1, 40))
+
+    # Data + assinatura
+    elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
+    elementos.append(Spacer(1, 40))
+    elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
+    elementos.append(Paragraph("CPF: 148.288.697-94", estilos["Normal"]))
+
+    doc.build(elementos)
+    buffer.seek(0)
+    return buffer
+
+# ----------------------------
+# Botão para download do PDF
+# ----------------------------
+pdf_buffer = gerar_pdf()
+st.download_button(
+    label="📥 Baixar Proposta em PDF",
+    data=pdf_buffer,
+    file_name=f"proposta_{cliente}.pdf",
+    mime="application/pdf"
+)
