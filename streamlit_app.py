@@ -23,7 +23,7 @@ validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 # ----------------------------
 # A/C e dados fixos da empresa
 # ----------------------------
-st.markdown(f"**A/C: {cliente}**")
+st.markdown(f"**A/C {cliente}**")
 st.markdown("### Dados da Empresa")
 st.markdown("""
 **Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
