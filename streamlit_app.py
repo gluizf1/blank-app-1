@@ -23,7 +23,7 @@ validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 # ----------------------------
 # A/C e dados fixos da empresa
 # ----------------------------
-st.markdown(f"**A/C {cliente}**")
+st.markdown(f"**A/C: {cliente}**")
 st.markdown("### Dados da Empresa")
 st.markdown("""
 **Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF profissional
+# Função para gerar PDF profissional com seção "Itens da Proposta"
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -154,7 +154,7 @@ def gerar_pdf():
     elementos.append(Paragraph(f"A/C: {cliente}", estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
-    # Dados fixos da empresa com fundo cinza
+    # Dados da empresa
     elementos.append(Paragraph("<b>Dados da Empresa</b>", estilos["Heading3"]))
     dados_empresa = [
         "Nome da Empresa: GUSTAVO LUIZ FREITAS DE SOUSA",
@@ -169,7 +169,7 @@ def gerar_pdf():
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 10))
 
-    # Dados para contato
+    # Dados de contato
     elementos.append(Paragraph("<b>Dados para Contato</b>", estilos["Heading3"]))
     contato = ["E-mail: gustavo_lfs@hotmail.com", "Telefone: (21) 996913090"]
     for linha in contato:
@@ -183,7 +183,13 @@ def gerar_pdf():
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
-    # Tabela de produtos com cores
+    # ----------------------------
+    # Título da seção Itens da Proposta
+    # ----------------------------
+    elementos.append(Paragraph("<b>Itens da Proposta</b>", estilos["Heading2"]))
+    elementos.append(Spacer(1, 10))
+
+    # Tabela de produtos
     if not df_final.empty:
         tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
         tabela.setStyle(TableStyle([
@@ -208,7 +214,7 @@ def gerar_pdf():
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
-    elementos.append(Spacer(1, 50))  # Espaço maior para assinatura
+    elementos.append(Spacer(1, 50))  # Espaço para assinatura
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
     elementos.append(Paragraph("CPF: 148.288.697-94", estilos["Normal"]))
 
