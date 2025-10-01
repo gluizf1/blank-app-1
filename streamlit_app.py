@@ -149,7 +149,7 @@ def gerar_pdf():
 
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=20, leading=24, spaceAfter=20, fontName="Helvetica-Bold"))  # Título principal
-    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))  # Títulos de seção
+    estilos.add(ParagraphStyle(name="SectionTitle", fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))  # Títulos de seção
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=10, fontName="Helvetica"))  # A/C e cliente
 
     # Cabeçalho
