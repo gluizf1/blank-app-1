@@ -161,14 +161,14 @@ def gerar_pdf():
         fontSize=14,
         leading=18,
         spaceAfter=10,
-        fontName="Helvetica-Oblique"
+        fontName="Helvetica-Bold"  # Agora os títulos das seções estão em negrito
     ))
     estilos.add(ParagraphStyle(
         name="ACStyle",
         fontSize=14,
         leading=20,
         spaceAfter=10,
-        fontName="Helvetica-Bold"
+        fontName="Helvetica"  # A/C normal
     ))
     estilos.add(ParagraphStyle(
         name="CellStyle",
@@ -178,7 +178,7 @@ def gerar_pdf():
 
     # Cabeçalho
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
-    elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
+    elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))  # A/C normal
     elementos.append(Spacer(1, 15))
 
     # Dados da empresa
@@ -221,8 +221,7 @@ def gerar_pdf():
             nova_linha = [Paragraph(str(item), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        # Ajustando a largura da coluna "Quantidade" para caber o título
-        col_widths = [150, 70, 100, 150, 80]  # Aumentei a largura da coluna Quantidade
+        col_widths = [150, 70, 100, 150, 80]  # Quantidade ajustada
 
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
 
