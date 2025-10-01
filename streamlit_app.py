@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF
+# Função para gerar PDF completo com tabela responsiva
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -161,7 +161,7 @@ def gerar_pdf():
         fontSize=14,
         leading=18,
         spaceAfter=10,
-        fontName="Helvetica-Oblique"  # itálico
+        fontName="Helvetica-Oblique"
     ))
     estilos.add(ParagraphStyle(
         name="ACStyle",
@@ -169,6 +169,11 @@ def gerar_pdf():
         leading=20,
         spaceAfter=10,
         fontName="Helvetica-Bold"
+    ))
+    estilos.add(ParagraphStyle(
+        name="CellStyle",
+        fontSize=10,
+        leading=12
     ))
 
     # Cabeçalho
@@ -209,10 +214,15 @@ def gerar_pdf():
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos com cabeçalho cinza claro e linhas alternadas
+    # Tabela responsiva
     if not df_final.empty:
-        dados_tabela = [list(df_final.columns)] + df_final.values.tolist()
-        tabela = Table(dados_tabela, colWidths=[100, 70, 100, 100, 80])
+        dados_tabela = [list(df_final.columns)]
+        for row in df_final.values.tolist():
+            nova_linha = [Paragraph(str(item), estilos["CellStyle"]) for item in row]
+            dados_tabela.append(nova_linha)
+
+        col_widths = [150, 50, 100, 150, 80]
+        tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
 
         estilo = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
