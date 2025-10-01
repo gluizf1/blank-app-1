@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF profissional com tabela limpa
+# Função para gerar PDF profissional com cabeçalho cinza claro
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -187,20 +187,20 @@ def gerar_pdf():
     elementos.append(Paragraph("<b>Itens da Proposta</b>", estilos["Heading2"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos limpa, com bordas
+    # Tabela de produtos com cabeçalho cinza claro
     if not df_final.empty:
-    tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
-    tabela.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.grey),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.whitesmoke),
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),
-        ("GRID", (0,0), (-1,-1), 0.5, colors.black),
-        ("BACKGROUND", (0,1), (-1,-1), colors.lightgrey),
-    ]))
-    elementos.append(tabela)
-    elementos.append(Spacer(1, 10))
-    elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
-    elementos.append(Spacer(1, 20))
+        tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
+        tabela.setStyle(TableStyle([
+            ("BOX", (0,0), (-1,-1), 1, colors.black),           # Borda externa
+            ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),   # Grades internas
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),     # Cabeçalho em negrito
+            ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),   # Fundo cinza claro só no cabeçalho
+        ]))
+        elementos.append(tabela)
+        elementos.append(Spacer(1, 10))
+        elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
+        elementos.append(Spacer(1, 20))
 
     # Condições comerciais
     elementos.append(Paragraph("<b>Condições Comerciais</b>", estilos["Heading3"]))
