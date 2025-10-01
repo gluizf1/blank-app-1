@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF com títulos padronizados e A/C destacado
+# Função para gerar PDF
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -148,9 +148,28 @@ def gerar_pdf():
     elementos = []
 
     estilos = getSampleStyleSheet()
-    estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=20, leading=24, spaceAfter=20, fontName="Helvetica-Bold"))  # Título principal
-    estilos.add(ParagraphStyle(name="SectionTitle", fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))  # Títulos de seção
-    estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=10, fontName="Helvetica"))  # A/C e cliente
+    estilos.add(ParagraphStyle(
+        name="CenterTitle",
+        alignment=TA_CENTER,
+        fontSize=20,
+        leading=24,
+        spaceAfter=20,
+        fontName="Helvetica-Bold"
+    ))
+    estilos.add(ParagraphStyle(
+        name="SectionTitle",
+        fontSize=14,
+        leading=18,
+        spaceAfter=10,
+        fontName="Helvetica-Oblique"  # itálico
+    ))
+    estilos.add(ParagraphStyle(
+        name="ACStyle",
+        fontSize=14,
+        leading=20,
+        spaceAfter=10,
+        fontName="Helvetica-Bold"
+    ))
 
     # Cabeçalho
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
@@ -186,20 +205,28 @@ def gerar_pdf():
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
-    # Seção Itens da Proposta
+    # Itens da Proposta
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos com cabeçalho cinza claro
+    # Tabela de produtos com cabeçalho cinza claro e linhas alternadas
     if not df_final.empty:
-        tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
-        tabela.setStyle(TableStyle([
-            ("BOX", (0,0), (-1,-1), 1, colors.black),           # Borda externa
-            ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),   # Grades internas
+        dados_tabela = [list(df_final.columns)] + df_final.values.tolist()
+        tabela = Table(dados_tabela, colWidths=[100, 70, 100, 100, 80])
+
+        estilo = TableStyle([
+            ("BOX", (0,0), (-1,-1), 1, colors.black),
+            ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
-            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),     # Cabeçalho em negrito
-            ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),   # Cabeçalho cinza claro
-        ]))
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+        ])
+
+        for i in range(1, len(dados_tabela)):
+            if i % 2 == 0:
+                estilo.add("BACKGROUND", (0,i), (-1,i), colors.whitesmoke)
+
+        tabela.setStyle(estilo)
         elementos.append(tabela)
         elementos.append(Spacer(1, 10))
         elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
