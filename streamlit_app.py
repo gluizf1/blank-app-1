@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF completo com tabela responsiva
+# Função para gerar PDF final
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -161,7 +161,7 @@ def gerar_pdf():
         fontSize=14,
         leading=18,
         spaceAfter=10,
-        fontName="Helvetica-Bold"  # Agora os títulos das seções estão em negrito
+        fontName="Helvetica-Bold"  # Títulos das seções em negrito
     ))
     estilos.add(ParagraphStyle(
         name="ACStyle",
@@ -178,7 +178,7 @@ def gerar_pdf():
 
     # Cabeçalho
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
-    elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))  # A/C normal
+    elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 15))
 
     # Dados da empresa
@@ -214,7 +214,6 @@ def gerar_pdf():
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela responsiva
     if not df_final.empty:
         dados_tabela = [list(df_final.columns)]
         for row in df_final.values.tolist():
@@ -224,7 +223,6 @@ def gerar_pdf():
         col_widths = [150, 70, 100, 150, 80]  # Quantidade ajustada
 
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
-
         estilo = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
             ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),
@@ -232,11 +230,9 @@ def gerar_pdf():
             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
             ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
         ])
-
         for i in range(1, len(dados_tabela)):
             if i % 2 == 0:
                 estilo.add("BACKGROUND", (0,i), (-1,i), colors.whitesmoke)
-
         tabela.setStyle(estilo)
         elementos.append(tabela)
         elementos.append(Spacer(1, 10))
@@ -262,7 +258,7 @@ def gerar_pdf():
     return buffer
 
 # ----------------------------
-# Botão para download do PDF
+# Botão de download do PDF
 # ----------------------------
 pdf_buffer = gerar_pdf()
 st.download_button(
