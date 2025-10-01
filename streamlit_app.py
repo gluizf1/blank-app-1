@@ -140,7 +140,7 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF profissional com seção "Itens da Proposta"
+# Função para gerar PDF profissional com tabela limpa
 # ----------------------------
 def gerar_pdf():
     buffer = BytesIO()
@@ -183,26 +183,23 @@ def gerar_pdf():
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
-    # ----------------------------
-    # Título da seção Itens da Proposta
-    # ----------------------------
+    # Seção Itens da Proposta
     elementos.append(Paragraph("<b>Itens da Proposta</b>", estilos["Heading2"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos
+    # Tabela de produtos limpa, com bordas
     if not df_final.empty:
-    tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
-    tabela.setStyle(TableStyle([
-        ("BOX", (0,0), (-1,-1), 1, colors.black),       # Borda geral
-        ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),  # Grades internas
-        ("ALIGN", (0,0), (-1,-1), "CENTER"),           # Centraliza texto
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"), # Cabeçalho em negrito
-        ("BACKGROUND", (0,0), (-1,0), colors.whitesmoke), # Cabeçalho em cinza claro opcional
-    ]))
-    elementos.append(tabela)
-    elementos.append(Spacer(1, 10))
-    elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
-    elementos.append(Spacer(1, 20))
+        tabela = Table([list(df_final.columns)] + df_final.values.tolist(), colWidths=[100, 70, 100, 100, 80])
+        tabela.setStyle(TableStyle([
+            ("BOX", (0,0), (-1,-1), 1, colors.black),       # Borda externa
+            ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),  # Grades internas
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"), # Cabeçalho em negrito
+        ]))
+        elementos.append(tabela)
+        elementos.append(Spacer(1, 10))
+        elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
+        elementos.append(Spacer(1, 20))
 
     # Condições comerciais
     elementos.append(Paragraph("<b>Condições Comerciais</b>", estilos["Heading3"]))
@@ -214,7 +211,7 @@ def gerar_pdf():
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
-    elementos.append(Spacer(1, 50))  # Espaço para assinatura
+    elementos.append(Spacer(1, 50))
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
     elementos.append(Paragraph("CPF: 148.288.697-94", estilos["Normal"]))
 
