@@ -155,8 +155,8 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
     # Logo centralizado
     try:
         logo = Image(caminho_logo)
-        logo.drawHeight = 71 
-        logo.drawWidth = 174 
+        logo.drawHeight = 42 
+        logo.drawWidth = 104 
         logo.hAlign = 'CENTER'
         elementos.append(logo)
         elementos.append(Spacer(1, 15))
@@ -250,7 +250,7 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
 # ----------------------------
 pdf_buffer = gerar_pdf_com_logo_central(caminho_logo="logo.jpg")
 st.download_button(
-    label="📥 Baixar Proposta em PDF",
+    label="Baixar Proposta em PDF",
     data=pdf_buffer,
     file_name=f"proposta_{cliente}.pdf",
     mime="application/pdf"
