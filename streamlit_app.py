@@ -196,14 +196,14 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     ]
     for linha in dados_empresa:
         elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Spacer(1, 3))
 
     # Dados de contato
     elementos.append(Paragraph("Dados para Contato", estilos["SectionTitle"]))
     contato = ["E-mail: gustavo_lfs@hotmail.com", "Telefone: (21) 996913090"]
     for linha in contato:
         elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Spacer(1, 3))
 
     # Dados bancários
     elementos.append(Paragraph("Dados Bancários", estilos["SectionTitle"]))
@@ -214,7 +214,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     # Itens da proposta
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
-    elementos.append(Spacer(1, 5))
+    elementos.append(Spacer(1, 3))
 
     if not df_final.empty:
         df_tabela = df_final.copy()
@@ -271,7 +271,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Paragraph(f"Prazo de Pagamento: {prazo_pagamento}", estilos["Normal"]))
     elementos.append(Paragraph(f"Prazo de Entrega: {prazo_entrega}", estilos["Normal"]))
     elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Spacer(1, 20))
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
