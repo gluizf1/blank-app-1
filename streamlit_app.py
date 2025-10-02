@@ -187,12 +187,66 @@ else:
 # Botões de adicionar/remover/limpar
 # ----------------------------
 col1, col2, col3 = st.columns(3)
+
+# Adicionar Produto (verde)
 with col1:
-    st.button("➕ Adicionar Produto", on_click=adicionar_produto)
+    if st.button("➕ Adicionar Produto"):
+        adicionar_produto()
+    st.markdown(
+        """
+        <style>
+        div.stButton > button:first-child {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Remover Último (laranja)
 with col2:
-    st.button("➖ Remover Último", on_click=remover_produto, disabled=len(st.session_state.produtos) <= 1)
+    if st.button("➖ Remover Último", disabled=len(st.session_state.produtos) <= 1):
+        remover_produto()
+    st.markdown(
+        """
+        <style>
+        div.stButton > button:first-child {
+            background-color: #FFA500;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Limpar Todos (vermelho)
 with col3:
-    st.button("🗑️ Limpar Todos", on_click=limpar_produtos)
+    if st.button("🗑️ Limpar Todos"):
+        limpar_produtos()
+    st.markdown(
+        """
+        <style>
+        div.stButton > button:first-child {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 # ----------------------------
 # Resumo e total
