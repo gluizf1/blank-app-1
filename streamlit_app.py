@@ -231,7 +231,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
             elif col == "Preço Unitário (R$)":
                 larguras.append(largura_total * 0.2)
             elif col == "Quantidade":
-                larguras.append(largura_total * 0.15)
+                larguras.append(largura_total * 0.11)
             else:  # Total (R$)
                 larguras.append(largura_total * 0.15)
 
