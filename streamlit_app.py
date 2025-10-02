@@ -32,7 +32,10 @@ validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
 st.sidebar.markdown("---")
 st.sidebar.header("Upload de Produtos")
-uploaded_file = st.sidebar.file_uploader("Enviar planilha (.xlsx) com colunas: Produto, Quant., Preço Unit., Observações", type=["xlsx"])
+uploaded_file = st.sidebar.file_uploader(
+    "Enviar planilha (.xlsx) com colunas: Produto, Quant., Preço Unit., Observações", 
+    type=["xlsx"]
+)
 
 # Função para gerar o Excel em memória
 def gerar_excel_modelo():
@@ -58,13 +61,11 @@ with st.sidebar:
     )
 
 # ----------------------------
-# Se recém carregou um arquivo, transformar em produtos só uma vez
-# (evita sobrescrever edições em cada rerun)
+# Se recém carregou um arquivo, processa apenas uma vez
 # ----------------------------
 if uploaded_file is not None:
     last = st.session_state.get("_last_uploaded_name")
     if last != getattr(uploaded_file, "name", None):
-        # nova carga — processar
         try:
             df_excel = pd.read_excel(uploaded_file)
             expected = {"Produto", "Quant.", "Preço Unit."}  # Observações opcional
@@ -165,16 +166,13 @@ for i, item in enumerate(st.session_state.produtos):
             "Total (R$)": total
         })
 
-# atualiza session_state sem perder ids (preserva número de itens exibidos)
-# recria ids se houver menos/mais items
+# Atualiza session_state
 if len(st.session_state.produtos) != len(produtos_editados):
-    # caso upload tenha mudado o número de linhas, recriar session_state com novos ids
     nova_lista = []
     for row in produtos_editados:
         nova_lista.append({**row, "id": str(uuid.uuid4())})
     st.session_state.produtos = nova_lista
 else:
-    # atualiza mantendo a ordem/ids
     for idx, (old, new) in enumerate(zip(st.session_state.produtos, produtos_editados)):
         st.session_state.produtos[idx].update({
             "Produto": new["Produto"],
@@ -187,75 +185,12 @@ else:
 # Botões de adicionar/remover/limpar
 # ----------------------------
 col1, col2, col3 = st.columns(3)
-
-# Inicializa flags
-if "btn_adicionar" not in st.session_state:
-    st.session_state["btn_adicionar"] = False
-if "btn_remover" not in st.session_state:
-    st.session_state["btn_remover"] = False
-if "btn_limpar" not in st.session_state:
-    st.session_state["btn_limpar"] = False
-
-# Função para capturar clique via st.markdown
-def button_click(key):
-    st.session_state[key] = True
-
-# Adicionar Produto (verde)
 with col1:
-    st.markdown(
-        f"""
-        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
-            background-color:#4CAF50;
-            color:white;
-            padding:8px 20px;
-            border:none;
-            border-radius:5px;
-            font-size:14px;">
-            ➕ Adicionar Produto
-        </button>
-        """,
-        unsafe_allow_html=True
-    )
-    if st.button("Adicionar Produto", key="fake1"):  # botão invisível só para capturar clique
-        adicionar_produto()
-
-# Remover Último (laranja)
+    st.button("➕ Adicionar Produto", on_click=adicionar_produto)
 with col2:
-    st.markdown(
-        f"""
-        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
-            background-color:#FFA500;
-            color:white;
-            padding:8px 20px;
-            border:none;
-            border-radius:5px;
-            font-size:14px;">
-            ➖ Remover Último
-        </button>
-        """,
-        unsafe_allow_html=True
-    )
-    if st.button("Remover Último", key="fake2", disabled=len(st.session_state.produtos) <= 1):
-        remover_produto()
-
-# Limpar Todos (vermelho)
+    st.button("➖ Remover Último", on_click=remover_produto, disabled=len(st.session_state.produtos) <= 1)
 with col3:
-    st.markdown(
-        f"""
-        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
-            background-color:#f44336;
-            color:white;
-            padding:8px 20px;
-            border:none;
-            border-radius:5px;
-            font-size:14px;">
-            🗑️ Limpar Todos
-        </button>
-        """,
-        unsafe_allow_html=True
-    )
-    if st.button("Limpar Todos", key="fake3"):
-        limpar_produtos()
+    st.button("🗑️ Limpar Todos", on_click=limpar_produtos)
 
 # ----------------------------
 # Resumo e total
@@ -280,11 +215,7 @@ st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indis
 # ----------------------------
 # Data formatada PT-BR
 # ----------------------------
-meses_pt = {
-    1: "janeiro", 2: "fevereiro", 3: "março", 4: "abril",
-    5: "maio", 6: "junho", 7: "julho", 8: "agosto",
-    9: "setembro", 10: "outubro", 11: "novembro", 12: "dezembro"
-}
+meses_pt = {1:"janeiro",2:"fevereiro",3:"março",4:"abril",5:"maio",6:"junho",7:"julho",8:"agosto",9:"setembro",10:"outubro",11:"novembro",12:"dezembro"}
 dia = data_proposta.day
 mes = meses_pt[data_proposta.month]
 ano = data_proposta.year
@@ -300,7 +231,6 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
-
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=12, fontName="Helvetica-Bold"))
     estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_LEFT, fontSize=12, leading=14, spaceAfter=6, fontName="Helvetica-BoldOblique"))
@@ -325,7 +255,7 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
     elementos.append(Paragraph(f"A/C {cliente}", estilos["NormalLeft"]))
     elementos.append(Spacer(1, 8))
 
-    # Dados fixos (empresa, contato, bancários) - aparecem no PDF
+    # Dados fixos (empresa, contato, bancários)
     elementos.append(Paragraph("Dados da Empresa", estilos["SectionTitle"]))
     dados_empresa = [
         "Nome da Empresa: GUSTAVO LUIZ FREITAS DE SOUSA",
@@ -354,34 +284,22 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
 
     # Itens da proposta (tabela)
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
-
     if not df_final.empty:
         df_tabela = df_final.copy()
-        # Garantir ordem/colunas
-        # Esperamos: Produto, Quant., Preço Unit., Observações, Total (R$)
-        # Renomear Preço Unit. para indicar R$
         if "Preço Unit." in df_tabela.columns:
             df_tabela = df_tabela.rename(columns={"Preço Unit.": "Preço Unit. (R$)"})
-
-        # Formatar colunas numéricas no padrão brasileiro (sem R$)
         if "Preço Unit. (R$)" in df_tabela.columns:
             df_tabela["Preço Unit. (R$)"] = df_tabela["Preço Unit. (R$)"].apply(formato_brl_num)
         if "Total (R$)" in df_tabela.columns:
             df_tabela["Total (R$)"] = df_tabela["Total (R$)"].apply(formato_brl_num)
-
-        # Montar dados da tabela (manter Observações se existir)
         header = list(df_tabela.columns)
         dados_tabela = [header]
         for row in df_tabela.itertuples(index=False, name=None):
             linha = [Paragraph(str(c).replace("\n", " "), estilos["NormalLeft"]) for c in row]
             dados_tabela.append(linha)
-
-        # ColWidths proporcionais com base nas colunas presentes
         margem_esq = doc.leftMargin
         margem_dir = doc.rightMargin
         largura_total = A4[0] - margem_esq - margem_dir
-        col_count = len(header)
-        # heurística: dar mais espaço para Produto e Observações
         col_widths = []
         for col in header:
             if "Produto" in col:
@@ -392,9 +310,8 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
                 col_widths.append(largura_total * 0.1)
             elif "Preço Unit." in col:
                 col_widths.append(largura_total * 0.15)
-            else:  # Total ou outros
+            else:
                 col_widths.append(largura_total * 0.15)
-
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
         estilo_table = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
@@ -404,7 +321,6 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
             ("FONTSIZE", (0,0), (-1, -1), 9),
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
         ])
-        # ajustar alinhamentos: produto e observações left, numeros right/center
         for ci, col in enumerate(header):
             if "Produto" in col or "Observações" in col:
                 estilo_table.add("ALIGN", (ci,1), (ci,-1), "LEFT")
@@ -413,8 +329,6 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
         tabela.setStyle(estilo_table)
         elementos.append(tabela)
         elementos.append(Spacer(1, 8))
-
-        # Total Geral (formatado)
         elementos.append(Paragraph(f"Total Geral: R$ {formato_brl_num(total_geral)}", estilos["NormalLeft"]))
         elementos.append(Spacer(1, 10))
     else:
@@ -429,9 +343,8 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
     elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["NormalLeft"]))
     elementos.append(Spacer(1, 8))
 
-    # Data + assinatura + nome (sem CPF)
+    # Data + assinatura + nome
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["NormalLeft"]))
-    # inserir assinatura (se existir)
     try:
         assinatura = Image("assinatura.png")
         assinatura.drawHeight = 50
@@ -447,9 +360,7 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
     return buffer.getvalue()
 
 # ----------------------------
-# Botão de download (apenas 1 botão: faz o download direto)
-# ----------------------------
-# Gerar bytes do PDF com os dados atuais (se df_final estiver vazio, ainda gera um PDF com a mensagem)
+# Botão de download PDF
 pdf_bytes = gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
 st.download_button(
     label="Baixar Proposta em PDF",
