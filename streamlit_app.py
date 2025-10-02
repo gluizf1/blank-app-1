@@ -58,6 +58,34 @@ if "produtos" not in st.session_state:
         {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
     ]
 
+# ----------------------------
+# Upload do Excel para preencher produtos
+# ----------------------------
+arquivo_excel = st.file_uploader("Upload da planilha de produtos", type=['xlsx', 'xls'])
+if arquivo_excel:
+    try:
+        df_excel = pd.read_excel(arquivo_excel)
+        colunas_necessarias = ["Produto", "Quant.", "Preço Unit.", "Observações"]
+        if all(col in df_excel.columns for col in colunas_necessarias):
+            st.session_state.produtos = [
+                {
+                    "id": str(uuid.uuid4()),
+                    "Produto": row["Produto"],
+                    "Quant.": row["Quant."],
+                    "Preço Unit.": row["Preço Unit."],
+                    "Observações": row.get("Observações", "")
+                }
+                for _, row in df_excel.iterrows()
+            ]
+            st.success("Produtos carregados com sucesso!")
+        else:
+            st.error(f"As colunas devem ser: {colunas_necessarias}")
+    except Exception as e:
+        st.error(f"Erro ao ler o arquivo Excel: {e}")
+
+# ----------------------------
+# Funções para adicionar/remover/limpar produtos
+# ----------------------------
 def adicionar_produto():
     st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""})
     st.rerun()
@@ -174,8 +202,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         logo.hAlign = 'CENTER'
         elementos.append(logo)
         elementos.append(Spacer(1, 10))
-    except Exception as e:
-        st.error(f"Erro ao carregar a logo: {e}")
+    except:
         elementos.append(Spacer(1, 75))
 
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
@@ -271,7 +298,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Paragraph(f"Prazo de Pagamento: {prazo_pagamento}", estilos["Normal"]))
     elementos.append(Paragraph(f"Prazo de Entrega: {prazo_entrega}", estilos["Normal"]))
     elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["Normal"]))
-    elementos.append(Spacer(1, 20))
+    elementos.append(Spacer(1, 10))
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
@@ -281,8 +308,8 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         assinatura.drawWidth = 120
         assinatura.hAlign = 'LEFT'
         elementos.append(assinatura)
-    except Exception as e:
-        st.error(f"Erro ao carregar a assinatura: {e}")
+    except:
+        pass
 
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
 
@@ -291,7 +318,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     return buffer
 
 # ----------------------------
-# Download automático do PDF
+# Download do PDF
 # ----------------------------
 pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
 st.download_button(
