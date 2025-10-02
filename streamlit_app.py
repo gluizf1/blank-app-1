@@ -186,49 +186,76 @@ else:
 # ----------------------------
 # Botões de adicionar/remover/limpar
 # ----------------------------
-# Inicializa flags
-if "acao" not in st.session_state:
-    st.session_state["acao"] = ""
-
 col1, col2, col3 = st.columns(3)
 
+# Inicializa flags
+if "btn_adicionar" not in st.session_state:
+    st.session_state["btn_adicionar"] = False
+if "btn_remover" not in st.session_state:
+    st.session_state["btn_remover"] = False
+if "btn_limpar" not in st.session_state:
+    st.session_state["btn_limpar"] = False
+
+# Função para capturar clique via st.markdown
+def button_click(key):
+    st.session_state[key] = True
+
+# Adicionar Produto (verde)
 with col1:
-    if st.button("➕ Adicionar Produto"):
-        st.session_state["acao"] = "adicionar"
-    st.markdown("""
-        <style>
-        div.stButton > button:first-child {background-color:#4CAF50;color:white;padding:8px 20px;border:none;border-radius:5px;font-size:14px;}
-        </style>
-        """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#4CAF50;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            ➕ Adicionar Produto
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Adicionar Produto", key="fake1"):  # botão invisível só para capturar clique
+        adicionar_produto()
 
+# Remover Último (laranja)
 with col2:
-    if st.button("➖ Remover Último", disabled=len(st.session_state.get("produtos", [])) <= 1):
-        st.session_state["acao"] = "remover"
-    st.markdown("""
-        <style>
-        div.stButton > button:first-child {background-color:#FFA500;color:white;padding:8px 20px;border:none;border-radius:5px;font-size:14px;}
-        </style>
-        """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#FFA500;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            ➖ Remover Último
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Remover Último", key="fake2", disabled=len(st.session_state.produtos) <= 1):
+        remover_produto()
 
+# Limpar Todos (vermelho)
 with col3:
-    if st.button("🗑️ Limpar Todos"):
-        st.session_state["acao"] = "limpar"
-    st.markdown("""
-        <style>
-        div.stButton > button:first-child {background-color:#f44336;color:white;padding:8px 20px;border:none;border-radius:5px;font-size:14px;}
-        </style>
-        """, unsafe_allow_html=True)
-
-# Executa ação
-if st.session_state["acao"] == "adicionar":
-    adicionar_produto()
-elif st.session_state["acao"] == "remover":
-    remover_produto()
-elif st.session_state["acao"] == "limpar":
-    limpar_produtos()
-
-# Reseta ação
-st.session_state["acao"] = ""
+    st.markdown(
+        f"""
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#f44336;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            🗑️ Limpar Todos
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Limpar Todos", key="fake3"):
+        limpar_produtos()
 
 # ----------------------------
 # Resumo e total
