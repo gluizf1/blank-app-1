@@ -34,6 +34,20 @@ st.sidebar.markdown("---")
 st.sidebar.header("Upload de Produtos")
 uploaded_file = st.sidebar.file_uploader("Enviar planilha (.xlsx) com colunas: Produto, Quant., Preço Unit., Observações", type=["xlsx"])
 
+# Função para gerar o Excel em memória
+def gerar_excel_modelo():
+    data = {
+        "Produto": ["Produto A", "Produto B", "Produto C"],
+        "Quant.": [10, 5, 2],
+        "Preço Unit.": [25.50, 100.00, 350.75]
+    }
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    df.to_excel(output, index=False)
+    output.seek(0)
+    return output
+
+# Colocar botão na barra lateral
 with st.sidebar:
     st.download_button(
         label="📥 Baixar modelo Excel",
