@@ -39,7 +39,7 @@ def gerar_excel_modelo():
     data = {
         "Produto": ["Produto A", "Produto B", "Produto C"],
         "Quant.": [10, 5, 2],
-        "Preço Unit.": [25.50, 100.00, 350.75]
+        "Preço Unit.": [25.50, 100.00, 350.75],
         "Observações": ["", "", ""]
     }
     df = pd.DataFrame(data)
