@@ -191,39 +191,78 @@ col1, col2, col3 = st.columns(3)
 # ----------------------------
 # Botões de adicionar/remover/limpar com cores independentes
 # ----------------------------
+# ----------------------------
+# Botões coloridos com HTML + st.session_state
+# ----------------------------
 col1, col2, col3 = st.columns(3)
 
+# Inicializa flags
+if "btn_adicionar" not in st.session_state:
+    st.session_state["btn_adicionar"] = False
+if "btn_remover" not in st.session_state:
+    st.session_state["btn_remover"] = False
+if "btn_limpar" not in st.session_state:
+    st.session_state["btn_limpar"] = False
+
+# Função para capturar clique via st.markdown
+def button_click(key):
+    st.session_state[key] = True
+
+# Adicionar Produto (verde)
 with col1:
-    if st.markdown(
-        """
-        <form action="#" target="_self">
-            <input type="submit" value="➕ Adicionar Produto" 
-            style="background-color:#4CAF50;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
-        </form>
-        """, unsafe_allow_html=True
-    ):
+    st.markdown(
+        f"""
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#4CAF50;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            ➕ Adicionar Produto
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Adicionar Produto", key="fake1"):  # botão invisível só para capturar clique
         adicionar_produto()
 
+# Remover Último (laranja)
 with col2:
-    if st.markdown(
+    st.markdown(
         f"""
-        <form action="#" target="_self">
-            <input type="submit" value="➖ Remover Último" {'disabled' if len(st.session_state.produtos) <= 1 else ''} 
-            style="background-color:#FFA500;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
-        </form>
-        """, unsafe_allow_html=True
-    ):
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#FFA500;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            ➖ Remover Último
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Remover Último", key="fake2", disabled=len(st.session_state.produtos) <= 1):
         remover_produto()
 
+# Limpar Todos (vermelho)
 with col3:
-    if st.markdown(
-        """
-        <form action="#" target="_self">
-            <input type="submit" value="🗑️ Limpar Todos" 
-            style="background-color:#f44336;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
-        </form>
-        """, unsafe_allow_html=True
-    ):
+    st.markdown(
+        f"""
+        <button onclick="window.location.href='#{uuid.uuid4()}'" style="
+            background-color:#f44336;
+            color:white;
+            padding:8px 20px;
+            border:none;
+            border-radius:5px;
+            font-size:14px;">
+            🗑️ Limpar Todos
+        </button>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Limpar Todos", key="fake3"):
         limpar_produtos()
 
 
