@@ -7,7 +7,6 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
-from babel.numbers import format_currency
 
 # ==============================
 # Função para gerar Excel modelo
@@ -24,6 +23,12 @@ def gerar_excel_modelo():
     df.to_excel(output, index=False)
     output.seek(0)
     return output
+
+# ==============================
+# Função para formatar valores em R$ (sem repetir símbolo na tabela)
+# ==============================
+def formatar_moeda(valor):
+    return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 # ==============================
 # Função para gerar o PDF
@@ -66,13 +71,13 @@ def gerar_pdf(cliente, produtos_df):
         data.append([
             row["Produto"],
             str(row["Quant."]),
-            f"{row['Preço Unit.']:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
-            f"{total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            formatar_moeda(row["Preço Unit."]),
+            formatar_moeda(total),
             row.get("Observações", "")
         ])
 
     # Linha de total
-    data.append(["", "", "Total Geral", f"{total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), ""])
+    data.append(["", "", "Total Geral", formatar_moeda(total_geral), ""])
 
     tabela = Table(data, hAlign="LEFT")
     tabela.setStyle(TableStyle([
@@ -127,8 +132,8 @@ if not produtos_df.empty:
     st.subheader("Produtos Carregados")
     st.dataframe(produtos_df)
 
-# Botão para gerar PDF
-if st.button("Baixar Proposta em PDF"):
+# Botão para gerar PDF (download automático)
+if st.button("Gerar Proposta em PDF"):
     if not cliente:
         st.error("Digite o nome do cliente antes de gerar o PDF.")
     elif produtos_df.empty:
