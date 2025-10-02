@@ -85,10 +85,10 @@ for i, item in enumerate(st.session_state.produtos):
             obs = st.text_input(f"Observações", item["Observações"], key=f"obs_{item['id']}")
         with col2:
             qtd = st.number_input("Quant.", min_value=0.0, value=float(item["Quant."]), key=f"qtd_{item['id']}")
-            preco = st.number_input("Preço Unit.", min_value=0.0, value=float(item["Preço Unit."]), key=f"preco_{item['id']}")
+            preco = st.number_input("Preço Unit. (R$)", min_value=0.0, value=float(item["Preço Unit."]), key=f"preco_{item['id']}")
 
         total = qtd * preco
-        st.markdown(f"**Total do Item: R$ {total:.2f}**")
+        st.markdown(f"**Total do Item: R$ {total:,.2f}**")
 
         produtos_editados.append({
             "Produto": nome,
@@ -98,7 +98,7 @@ for i, item in enumerate(st.session_state.produtos):
             "Total (R$)": total
         })
 
-# Atualiza session_state com as novas chaves
+# Atualiza session_state
 st.session_state.produtos = [
     {**old, "Produto": new["Produto"], "Quant.": new["Quant."], "Preço Unit.": new["Preço Unit."], "Observações": new["Observações"]}
     for old, new in zip(st.session_state.produtos, produtos_editados)
@@ -123,7 +123,7 @@ st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
 
 total_geral = df_final["Total (R$)"].sum() if not df_final.empty else 0.0
-st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
+st.markdown(f"**Total Geral: R$ {total_geral:,.2f}**")
 
 # ----------------------------
 # Condições Comerciais
@@ -217,23 +217,34 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Spacer(1, 10))
 
     if not df_final.empty:
-        dados_tabela = [list(df_final.columns)]
-        for row in df_final.values.tolist():
+        # Atualiza colunas
+        df_tabela = df_final.copy()
+        df_tabela.rename(columns={"Preço Unit.": "Preço Unit. (R$)"}, inplace=True)
+
+        # Formata valores monetários
+        def formato_brl(valor):
+            return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+        df_tabela["Preço Unit. (R$)"] = df_tabela["Preço Unit. (R$)"].apply(formato_brl)
+        df_tabela["Total (R$)"] = df_tabela["Total (R$)"].apply(formato_brl)
+
+        dados_tabela = [list(df_tabela.columns)]
+        for row in df_tabela.values.tolist():
             nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
         # Largura proporcional das colunas
-        colunas = list(df_final.columns)
+        colunas = list(df_tabela.columns)
         largura_total = A4[0] - 80
         larguras = []
         for col in colunas:
             if col in ["Produto", "Observações"]:
                 larguras.append(largura_total * 0.3)
-            elif col == "Preço Unit.":
+            elif col == "Preço Unit. (R$)":
                 larguras.append(largura_total * 0.15)
             elif col == "Quant.":
                 larguras.append(largura_total * 0.1)
-            else:  # Total (R$)
+            else:
                 larguras.append(largura_total * 0.15)
 
         tabela = Table(dados_tabela, colWidths=larguras, repeatRows=1)
@@ -249,7 +260,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         tabela.setStyle(estilo)
         elementos.append(tabela)
         elementos.append(Spacer(1, 10))
-        elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
+        elementos.append(Paragraph(f"Total Geral: {formato_brl(total_geral)}", estilos["Normal"]))
         elementos.append(Spacer(1, 20))
     else:
         elementos.append(Paragraph("Nenhum item adicionado.", estilos["Normal"]))
