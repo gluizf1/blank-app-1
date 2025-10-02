@@ -34,6 +34,14 @@ st.sidebar.markdown("---")
 st.sidebar.header("Upload de Produtos")
 uploaded_file = st.sidebar.file_uploader("Enviar planilha (.xlsx) com colunas: Produto, Quant., Preço Unit., Observações", type=["xlsx"])
 
+with st.sidebar:
+    st.download_button(
+        label="📥 Baixar modelo Excel",
+        data=gerar_excel_modelo(),
+        file_name="produtos_modelo.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 # ----------------------------
 # Se recém carregou um arquivo, transformar em produtos só uma vez
 # (evita sobrescrever edições em cada rerun)
