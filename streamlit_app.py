@@ -214,7 +214,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     # Itens da proposta
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Spacer(1, 5))
 
     if not df_final.empty:
         df_tabela = df_final.copy()
