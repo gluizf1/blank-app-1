@@ -98,6 +98,7 @@ for i, item in enumerate(st.session_state.produtos):
             "Total (R$)": total
         })
 
+# Atualiza session_state com as novas chaves
 st.session_state.produtos = [
     {**old, "Produto": new["Produto"], "Quant.": new["Quant."], "Preço Unit.": new["Preço Unit."], "Observações": new["Observações"]}
     for old, new in zip(st.session_state.produtos, produtos_editados)
@@ -118,13 +119,6 @@ with col3:
 # Resumo da proposta
 # ----------------------------
 df_final = pd.DataFrame(produtos_editados)
-
-# Garantir que as colunas já estão com os nomes corretos
-df_final = df_final.rename(columns={
-    "Preço Unit.": "Preço Unit.",
-    "Quant.": "Quant."
-})
-
 st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
 
@@ -158,7 +152,7 @@ st.markdown(f"\n\n\n**Rio de Janeiro, {data_formatada}.**")
 st.markdown("**Gustavo Luiz Freitas de Sousa**")
 
 # ----------------------------
-# Função para gerar PDF com logo fixa e assinatura
+# Função para gerar PDF
 # ----------------------------
 @st.cache_data
 def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta):
@@ -230,7 +224,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
         # Largura proporcional das colunas
         colunas = list(df_final.columns)
-        largura_total = A4[0] - 80  # margens
+        largura_total = A4[0] - 80
         larguras = []
         for col in colunas:
             if col in ["Produto", "Observações"]:
@@ -271,7 +265,6 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
-
     try:
         assinatura = Image("assinatura.png")
         assinatura.drawHeight = 50
