@@ -21,11 +21,6 @@ prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
-# Upload de logo
-uploaded_logo = st.sidebar.file_uploader("Upload Logo (opcional, JPG/PNG)", type=['jpg', 'png'])
-if uploaded_logo:
-    st.sidebar.image(uploaded_logo, caption="Logo Preview", use_column_width=True)
-
 # ----------------------------
 # A/C e dados fixos da empresa
 # ----------------------------
@@ -159,35 +154,30 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF com logo
+# Função para gerar PDF com logo fixa
 # ----------------------------
 @st.cache_data
-def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo=None):
+def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
 
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=20, fontName="Helvetica-Bold"))
-    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))  # negrito + itálico
+    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=15, fontName="Helvetica"))
     estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))
 
-    # Logo centralizado
-    if uploaded_logo:
-        try:
-            from reportlab.lib.utils import ImageReader
-            logo_bytes = uploaded_logo.read()
-            logo = Image(ImageReader(BytesIO(logo_bytes)))
-            logo.drawHeight = 50
-            logo.drawWidth = 120
-            logo.hAlign = 'CENTER'
-            elementos.append(logo)
-            elementos.append(Spacer(1, 10))
-        except Exception as e:
-            st.error(f"Erro ao processar logo: {e}")
-            elementos.append(Spacer(1, 75))
-    else:
+    # Logo fixa
+    try:
+        logo = Image("logo.jpg")
+        logo.drawHeight = 50
+        logo.drawWidth = 120
+        logo.hAlign = 'CENTER'
+        elementos.append(logo)
+        elementos.append(Spacer(1, 10))
+    except Exception as e:
+        st.error(f"Erro ao carregar a logo: {e}")
         elementos.append(Spacer(1, 75))
 
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
@@ -276,7 +266,7 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
 # Botão de download do PDF
 # ----------------------------
 if st.button("Baixar Proposta em PDF", type="primary"):
-    pdf_buffer = gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo)
+    pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
     st.download_button(
         label="📥 Download PDF",
         data=pdf_buffer,
