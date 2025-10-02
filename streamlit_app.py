@@ -12,7 +12,7 @@ import uuid
 st.title("Gerador de Proposta Comercial") 
 
 # ----------------------------
-# Informações do cliente
+# Sidebar: Informações da proposta e upload Excel
 # ----------------------------
 st.sidebar.header("Detalhes da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente", "Cliente Exemplo")
@@ -21,39 +21,65 @@ prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
-# ----------------------------
 # Upload Excel de produtos
-# ----------------------------
-uploaded_file = st.sidebar.file_uploader("Upload Excel de Produtos", type="xlsx")
-df_excel = None
+uploaded_file = st.sidebar.file_uploader("Upload Excel de Produtos (.xlsx)", type="xlsx")
 if uploaded_file:
     try:
         df_excel = pd.read_excel(uploaded_file)
         st.sidebar.success("Arquivo carregado com sucesso!")
-    except Exception as e:
-        st.sidebar.error(f"Erro ao ler o arquivo Excel: {e}")
-
-# ----------------------------
-# Inicializa lista de produtos
-# ----------------------------
-if "produtos" not in st.session_state:
-    if df_excel is not None:
-        # Preencher produtos a partir do Excel
-        produtos_iniciais = []
+        produtos = []
         for _, row in df_excel.iterrows():
-            produtos_iniciais.append({
+            produtos.append({
                 "id": str(uuid.uuid4()),
                 "Produto": row.get("Produto", ""),
                 "Quant.": row.get("Quant.", 1),
                 "Preço Unit.": row.get("Preço Unit.", 0.0),
                 "Observações": row.get("Observações", "")
             })
-        st.session_state.produtos = produtos_iniciais
-    else:
-        st.session_state.produtos = [
-            {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
-        ]
+        st.session_state.produtos = produtos
+    except Exception as e:
+        st.sidebar.error(f"Erro ao ler o arquivo Excel: {e}")
 
+# ----------------------------
+# Inicializa lista de produtos se não existir
+# ----------------------------
+if "produtos" not in st.session_state:
+    st.session_state.produtos = [
+        {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
+    ]
+
+# ----------------------------
+# Dados fixos da empresa
+# ----------------------------
+st.markdown(f"**A/C {cliente}**")
+st.markdown("### Dados da Empresa")
+st.markdown("""
+**Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
+**CNPJ:** 41.640.044/0001-63  
+**IE:** 33.822.412.281  
+**IM:** 1.304.930-0  
+**Endereço:** Rua Henrique Fleiuss, 444 - Tijuca  
+**Cidade/UF:** Rio de Janeiro / RJ  
+**CEP:** 20521-260
+""")
+
+st.markdown("### Dados para Contato")
+st.markdown("""
+**E-mail:** gustavo_lfs@hotmail.com  
+**Telefone:** (21) 996913090
+""")
+
+st.markdown("### Dados Bancários")
+st.markdown("""
+**Banco:** Inter  
+**Agência:** 0001  
+**Conta:** 12174848-0  
+**PIX:** 41.640.044/0001-63
+""")
+
+# ----------------------------
+# Funções de manipulação de produtos
+# ----------------------------
 def adicionar_produto():
     st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""})
     st.rerun()
@@ -68,7 +94,7 @@ def limpar_produtos():
     st.rerun()
 
 # ----------------------------
-# Editar produtos
+# Edição de produtos
 # ----------------------------
 st.header("Itens da Proposta")
 produtos_editados = []
@@ -100,7 +126,7 @@ st.session_state.produtos = [
 ]
 
 # ----------------------------
-# Botões de adicionar/remover/limpar
+# Botões adicionar/remover/limpar
 # ----------------------------
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -116,7 +142,6 @@ with col3:
 df_final = pd.DataFrame(produtos_editados)
 st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
-
 total_geral = df_final["Total (R$)"].sum() if not df_final.empty else 0.0
 st.markdown(f"**Total Geral: R$ {total_geral:,.2f}**")
 
@@ -147,7 +172,7 @@ st.markdown(f"\n\n\n**Rio de Janeiro, {data_formatada}.**")
 st.markdown("**Gustavo Luiz Freitas de Sousa**")
 
 # ----------------------------
-# Função para gerar PDF
+# Função gerar PDF
 # ----------------------------
 @st.cache_data
 def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta):
@@ -178,36 +203,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 10))
 
-    # Dados da empresa
-    elementos.append(Paragraph("Dados da Empresa", estilos["SectionTitle"]))
-    dados_empresa = [
-        "Nome da Empresa: GUSTAVO LUIZ FREITAS DE SOUSA",
-        "CNPJ: 41.640.044/0001-63",
-        "IE: 33.822.412.281",
-        "IM: 1.304.930-0",
-        "Endereço: Rua Henrique Fleiuss, 444 - Tijuca",
-        "Cidade/UF: Rio de Janeiro / RJ",
-        "CEP: 20521-260"
-    ]
-    for linha in dados_empresa:
-        elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
-
-    # Dados de contato
-    elementos.append(Paragraph("Dados para Contato", estilos["SectionTitle"]))
-    contato = ["E-mail: gustavo_lfs@hotmail.com", "Telefone: (21) 996913090"]
-    for linha in contato:
-        elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
-
-    # Dados bancários
-    elementos.append(Paragraph("Dados Bancários", estilos["SectionTitle"]))
-    bancarios = ["Banco: Inter", "Agência: 0001", "Conta: 12174848-0", "PIX: 41.640.044/0001-63"]
-    for linha in bancarios:
-        elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
-
-    # Itens da proposta
+    # Tabela produtos
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 5))
 
@@ -215,6 +211,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         df_tabela = df_final.copy()
         df_tabela.rename(columns={"Preço Unit.": "Preço Unit. (R$)"}, inplace=True)
 
+        # Formato monetário sem repetir R$
         def formato_brl(valor):
             return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -255,9 +252,6 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         elementos.append(Spacer(1, 10))
         elementos.append(Paragraph(f"Total Geral: {formato_brl(total_geral)}", estilos["Normal"]))
         elementos.append(Spacer(1, 20))
-    else:
-        elementos.append(Paragraph("Nenhum item adicionado.", estilos["Normal"]))
-        elementos.append(Spacer(1, 20))
 
     # Condições comerciais
     elementos.append(Paragraph("Condições Comerciais", estilos["SectionTitle"]))
@@ -265,7 +259,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Paragraph(f"Prazo de Pagamento: {prazo_pagamento}", estilos["Normal"]))
     elementos.append(Paragraph(f"Prazo de Entrega: {prazo_entrega}", estilos["Normal"]))
     elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["Normal"]))
-    elementos.append(Spacer(1, 10))
+    elementos.append(Spacer(1, 20))
 
     # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
