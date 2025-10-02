@@ -50,7 +50,7 @@ def gerar_excel_modelo():
 # Colocar botão na barra lateral
 with st.sidebar:
     st.download_button(
-        label="📥 Baixar modelo Excel",
+        label="Baixar Modelo Excel",
         data=gerar_excel_modelo(),
         file_name="produtos_modelo.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
