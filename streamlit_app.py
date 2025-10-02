@@ -22,70 +22,38 @@ prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
 # ----------------------------
-# A/C e dados fixos da empresa
+# Upload Excel de produtos
 # ----------------------------
-st.markdown(f"**A/C {cliente}**")
-st.markdown("### Dados da Empresa")
-st.markdown("""
-**Nome da Empresa:** GUSTAVO LUIZ FREITAS DE SOUSA  
-**CNPJ:** 41.640.044/0001-63  
-**IE:** 33.822.412.281  
-**IM:** 1.304.930-0  
-**Endereço:** Rua Henrique Fleiuss, 444 - Tijuca  
-**Cidade/UF:** Rio de Janeiro / RJ  
-**CEP:** 20521-260
-""")
-
-st.markdown("### Dados para Contato")
-st.markdown("""
-**E-mail:** gustavo_lfs@hotmail.com  
-**Telefone:** (21) 996913090
-""")
-
-st.markdown("### Dados Bancários")
-st.markdown("""
-**Banco:** Inter  
-**Agência:** 0001  
-**Conta:** 12174848-0  
-**PIX:** 41.640.044/0001-63
-""")
+uploaded_file = st.sidebar.file_uploader("Upload Excel de Produtos", type="xlsx")
+df_excel = None
+if uploaded_file:
+    try:
+        df_excel = pd.read_excel(uploaded_file)
+        st.sidebar.success("Arquivo carregado com sucesso!")
+    except Exception as e:
+        st.sidebar.error(f"Erro ao ler o arquivo Excel: {e}")
 
 # ----------------------------
 # Inicializa lista de produtos
 # ----------------------------
 if "produtos" not in st.session_state:
-    st.session_state.produtos = [
-        {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
-    ]
+    if df_excel is not None:
+        # Preencher produtos a partir do Excel
+        produtos_iniciais = []
+        for _, row in df_excel.iterrows():
+            produtos_iniciais.append({
+                "id": str(uuid.uuid4()),
+                "Produto": row.get("Produto", ""),
+                "Quant.": row.get("Quant.", 1),
+                "Preço Unit.": row.get("Preço Unit.", 0.0),
+                "Observações": row.get("Observações", "")
+            })
+        st.session_state.produtos = produtos_iniciais
+    else:
+        st.session_state.produtos = [
+            {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
+        ]
 
-# ----------------------------
-# Upload do Excel para preencher produtos
-# ----------------------------
-arquivo_excel = st.file_uploader("Upload da planilha de produtos", type=['xlsx', 'xls'])
-if arquivo_excel:
-    try:
-        df_excel = pd.read_excel(arquivo_excel)
-        colunas_necessarias = ["Produto", "Quant.", "Preço Unit.", "Observações"]
-        if all(col in df_excel.columns for col in colunas_necessarias):
-            st.session_state.produtos = [
-                {
-                    "id": str(uuid.uuid4()),
-                    "Produto": row["Produto"],
-                    "Quant.": row["Quant."],
-                    "Preço Unit.": row["Preço Unit."],
-                    "Observações": row.get("Observações", "")
-                }
-                for _, row in df_excel.iterrows()
-            ]
-            st.success("Produtos carregados com sucesso!")
-        else:
-            st.error(f"As colunas devem ser: {colunas_necessarias}")
-    except Exception as e:
-        st.error(f"Erro ao ler o arquivo Excel: {e}")
-
-# ----------------------------
-# Funções para adicionar/remover/limpar produtos
-# ----------------------------
 def adicionar_produto():
     st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""})
     st.rerun()
@@ -126,7 +94,6 @@ for i, item in enumerate(st.session_state.produtos):
             "Total (R$)": total
         })
 
-# Atualiza session_state
 st.session_state.produtos = [
     {**old, "Produto": new["Produto"], "Quant.": new["Quant."], "Preço Unit.": new["Preço Unit."], "Observações": new["Observações"]}
     for old, new in zip(st.session_state.produtos, produtos_editados)
@@ -202,7 +169,8 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         logo.hAlign = 'CENTER'
         elementos.append(logo)
         elementos.append(Spacer(1, 10))
-    except:
+    except Exception as e:
+        st.error(f"Erro ao carregar a logo: {e}")
         elementos.append(Spacer(1, 75))
 
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
@@ -247,7 +215,6 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         df_tabela = df_final.copy()
         df_tabela.rename(columns={"Preço Unit.": "Preço Unit. (R$)"}, inplace=True)
 
-        # Formata valores monetários sem R$
         def formato_brl(valor):
             return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -308,8 +275,8 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         assinatura.drawWidth = 120
         assinatura.hAlign = 'LEFT'
         elementos.append(assinatura)
-    except:
-        pass
+    except Exception as e:
+        st.error(f"Erro ao carregar a assinatura: {e}")
 
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
 
@@ -318,7 +285,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     return buffer
 
 # ----------------------------
-# Download do PDF
+# Download automático do PDF
 # ----------------------------
 pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
 st.download_button(
