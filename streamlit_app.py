@@ -196,25 +196,25 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     ]
     for linha in dados_empresa:
         elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 3))
+    elementos.append(Spacer(1, 10))
 
     # Dados de contato
     elementos.append(Paragraph("Dados para Contato", estilos["SectionTitle"]))
     contato = ["E-mail: gustavo_lfs@hotmail.com", "Telefone: (21) 996913090"]
     for linha in contato:
         elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 3))
+    elementos.append(Spacer(1, 10))
 
     # Dados bancários
     elementos.append(Paragraph("Dados Bancários", estilos["SectionTitle"]))
     bancarios = ["Banco: Inter", "Agência: 0001", "Conta: 12174848-0", "PIX: 41.640.044/0001-63"]
     for linha in bancarios:
         elementos.append(Paragraph(linha, estilos["Normal"]))
-    elementos.append(Spacer(1, 15))
+    elementos.append(Spacer(1, 10))
 
     # Itens da proposta
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
-    elementos.append(Spacer(1, 3))
+    elementos.append(Spacer(1, 10))
 
     if not df_final.empty:
         df_tabela = df_final.copy()
