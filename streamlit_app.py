@@ -142,7 +142,7 @@ st.markdown("CPF: 148.288.697-94")
 # ----------------------------
 # Função para gerar PDF com logo centralizado
 # ----------------------------
-def gerar_pdf_com_logo_central(caminho_logo="logo.png"):
+def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
@@ -249,7 +249,7 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.png"):
 # ----------------------------
 # Botão para download do PDF
 # ----------------------------
-pdf_buffer = gerar_pdf_com_logo_central(caminho_logo="logo.png")
+pdf_buffer = gerar_pdf_com_logo_central(caminho_logo="logo.jpg")
 st.download_button(
     label="📥 Baixar Proposta em PDF",
     data=pdf_buffer,
