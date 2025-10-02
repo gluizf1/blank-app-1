@@ -6,7 +6,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 import uuid
 
 st.title("Gerador de Proposta Comercial") 
@@ -162,7 +162,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=20, fontName="Helvetica-Bold"))
-    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))
+    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_LEFT, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=15, fontName="Helvetica"))
     estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))
 
@@ -217,13 +217,12 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Spacer(1, 10))
 
     if not df_final.empty:
-        # Atualiza colunas
         df_tabela = df_final.copy()
         df_tabela.rename(columns={"Preço Unit.": "Preço Unit. (R$)"}, inplace=True)
 
-        # Formata valores monetários
+        # Formata valores monetários sem R$
         def formato_brl(valor):
-            return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
         df_tabela["Preço Unit. (R$)"] = df_tabela["Preço Unit. (R$)"].apply(formato_brl)
         df_tabela["Total (R$)"] = df_tabela["Total (R$)"].apply(formato_brl)
@@ -233,7 +232,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
             nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        # Largura proporcional das colunas
+        # Largura proporcional
         colunas = list(df_tabela.columns)
         largura_total = A4[0] - 80
         larguras = []
