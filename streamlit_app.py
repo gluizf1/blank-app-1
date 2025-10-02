@@ -7,6 +7,7 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
+import uuid  # For unique keys in dynamic inputs
 
 st.title("Gerador de Proposta Comercial") 
 
@@ -19,6 +20,11 @@ data_proposta = st.sidebar.date_input("Data da Proposta", datetime.today())
 prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
+
+# Optional logo upload with preview
+uploaded_logo = st.sidebar.file_uploader("Upload Logo (opcional, JPG/PNG)", type=['jpg', 'png'])
+if uploaded_logo:
+    st.sidebar.image(uploaded_logo, caption="Logo Preview", use_column_width=True)
 
 # ----------------------------
 # A/C e dados fixos da empresa
@@ -54,15 +60,21 @@ st.markdown("""
 # ----------------------------
 if "produtos" not in st.session_state:
     st.session_state.produtos = [
-        {"Produto": "Produto A", "Quantidade": 1, "Preço Unitário (R$)": 100.0, "Observações": ""}
+        {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quantidade": 1, "Preço Unitário (R$)": 100.0, "Observações": ""}
     ]
 
 def adicionar_produto():
-    st.session_state.produtos.append({"Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""})
+    st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""})
+    st.rerun()  # Force rerun to update UI
 
 def remover_produto():
-    if st.session_state.produtos:
+    if len(st.session_state.produtos) > 1:  # Keep at least one
         st.session_state.produtos.pop()
+    st.rerun()
+
+def limpar_produtos():
+    st.session_state.produtos = [{"id": str(uuid.uuid4()), "Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""}]
+    st.rerun()
 
 # ----------------------------
 # Editar produtos
@@ -71,33 +83,41 @@ st.header("Itens da Proposta")
 produtos_editados = []
 
 for i, item in enumerate(st.session_state.produtos):
-    st.subheader(f"Produto {i+1}")
-    nome = st.text_input(f"Nome do Produto {i+1}", item["Produto"], key=f"nome_{i}")
-    qtd = st.number_input(f"Quantidade {i+1}", min_value=0, value=item["Quantidade"], key=f"qtd_{i}")
-    preco = st.number_input(f"Preço Unitário {i+1}", min_value=0.0, value=item["Preço Unitário (R$)"], key=f"preco_{i}")
-    obs = st.text_input(f"Observações {i+1}", item["Observações"], key=f"obs_{i}")
+    with st.expander(f"Produto {i+1}", expanded=True):  # Collapsible for better UX
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            nome = st.text_input(f"Nome do Produto", item["Produto"], key=f"nome_{item['id']}")
+            obs = st.text_input(f"Observações", item["Observações"], key=f"obs_{item['id']}")
+        with col2:
+            qtd = st.number_input("Quantidade", min_value=0.0, value=float(item["Quantidade"]), key=f"qtd_{item['id']}")
+            preco = st.number_input("Preço Unitário (R$)", min_value=0.0, value=float(item["Preço Unitário (R$)"]), key=f"preco_{item['id']}")
 
-    total = qtd * preco
-    st.markdown(f"**Total do Item: R$ {total:.2f}**")
+        total = qtd * preco
+        st.markdown(f"**Total do Item: R$ {total:.2f}**")
 
-    produtos_editados.append({
-        "Produto": nome,
-        "Quantidade": qtd,
-        "Preço Unitário (R$)": preco,
-        "Observações": obs,
-        "Total (R$)": total
-    })
+        produtos_editados.append({
+            "Produto": nome,
+            "Quantidade": qtd,
+            "Preço Unitário (R$)": preco,
+            "Observações": obs,
+            "Total (R$)": total
+        })
 
-st.session_state.produtos = produtos_editados
+st.session_state.produtos = [
+    {**old, "Produto": new["Produto"], "Quantidade": new["Quantidade"], "Preço Unitário (R$)": new["Preço Unitário (R$)"], "Observações": new["Observações"]}
+    for old, new in zip(st.session_state.produtos, produtos_editados)
+]
 
 # ----------------------------
-# Botões de adicionar/remover
+# Botões de adicionar/remover/limpar
 # ----------------------------
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     st.button("➕ Adicionar Produto", on_click=adicionar_produto)
 with col2:
-    st.button("➖ Remover Produto", on_click=remover_produto)
+    st.button("➖ Remover Último", on_click=remover_produto, disabled=len(st.session_state.produtos) <= 1)
+with col3:
+    st.button("🗑️ Limpar Todos", on_click=limpar_produtos)
 
 # ----------------------------
 # Resumo da proposta
@@ -106,7 +126,7 @@ df_final = pd.DataFrame(produtos_editados)
 st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
 
-total_geral = df_final["Total (R$)"].sum()
+total_geral = df_final["Total (R$)"].sum() if not df_final.empty else 0.0
 st.markdown(f"**Total Geral: R$ {total_geral:.2f}**")
 
 # ----------------------------
@@ -139,9 +159,10 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF com logo centralizado
+# Função para gerar PDF com logo (agora suporta upload)
 # ----------------------------
-def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
+@st.cache_data  # Cache para performance, mas invalidado por inputs
+def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo=None):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
     elementos = []
@@ -150,24 +171,31 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=20, fontName="Helvetica-Bold"))
     estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=15, fontName="Helvetica"))
-    estilos.add(ParagraphStyle(name="CellStyle", fontSize=10, leading=12))
+    estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))  # Slightly smaller for fit
 
-    # Logo centralizado
-    try:
-        logo = Image(caminho_logo)
-        logo.drawHeight = 42 
-        logo.drawWidth = 104 
-        logo.hAlign = 'CENTER'
-        elementos.append(logo)
-        elementos.append(Spacer(1, 15))
-    except:
+    # Logo centralizado (from upload or skip)
+    if uploaded_logo:
+        try:
+            # Save temp file from upload
+            logo_bytes = uploaded_logo.read()
+            from reportlab.lib.utils import ImageReader
+            logo = Image(ImageReader(logo_bytes))
+            logo.drawHeight = 50
+            logo.drawWidth = 120
+            logo.hAlign = 'CENTER'
+            elementos.append(logo)
+            elementos.append(Spacer(1, 10))
+        except Exception as e:
+            st.error(f"Erro ao processar logo: {e}")
+            elementos.append(Spacer(1, 75))
+    else:
         elementos.append(Spacer(1, 75))
 
     # Título principal centralizado
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # A/C normal
+    # A/C
     elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 10))
 
@@ -204,14 +232,14 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos
+    # Tabela de produtos (adjusted widths for better fit)
     if not df_final.empty:
         dados_tabela = [list(df_final.columns)]
         for row in df_final.values.tolist():
-            nova_linha = [Paragraph(str(item), estilos["CellStyle"]) for item in row]
+            nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]  # Handle newlines
             dados_tabela.append(nova_linha)
 
-        col_widths = [150, 70, 100, 150, 80]
+        col_widths = [140, 60, 90, 120, 70]  # Tweaked for overflow prevention
 
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
         estilo = TableStyle([
@@ -219,12 +247,17 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
             ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),
             ("ALIGN", (0,0), (-1,-1), "CENTER"),
             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("FONTSIZE", (0,0), (-1,0), 9),
             ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),  # Vertical align
         ])
         tabela.setStyle(estilo)
         elementos.append(tabela)
         elementos.append(Spacer(1, 10))
         elementos.append(Paragraph(f"Total Geral: R$ {total_geral:.2f}", estilos["Normal"]))
+        elementos.append(Spacer(1, 20))
+    else:
+        elementos.append(Paragraph("Nenhum item adicionado.", estilos["Normal"]))
         elementos.append(Spacer(1, 20))
 
     # Condições comerciais
@@ -248,10 +281,11 @@ def gerar_pdf_com_logo_central(caminho_logo="logo.jpg"):
 # ----------------------------
 # Botão para download do PDF
 # ----------------------------
-pdf_buffer = gerar_pdf_com_logo_central(caminho_logo="logo.jpg")
-st.download_button(
-    label="Baixar Proposta em PDF",
-    data=pdf_buffer,
-    file_name=f"proposta_{cliente}.pdf",
-    mime="application/pdf"
-)
+if st.button("Baixar Proposta em PDF", type="primary"):
+    pdf_buffer = gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo)
+    st.download_button(
+        label="📥 Download PDF",
+        data=pdf_buffer,
+        file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
+        mime="application/pdf"
+    )
