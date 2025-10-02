@@ -7,7 +7,7 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
-import uuid  # For unique keys in dynamic inputs
+import uuid
 
 st.title("Gerador de Proposta Comercial") 
 
@@ -21,7 +21,7 @@ prazo_pagamento = st.sidebar.text_input("Prazo de Pagamento", "30 dias")
 prazo_entrega = st.sidebar.text_input("Prazo de Entrega", "15 dias")
 validade_proposta = st.sidebar.text_input("Validade da Proposta", "30 dias")
 
-# Optional logo upload with preview
+# Upload de logo
 uploaded_logo = st.sidebar.file_uploader("Upload Logo (opcional, JPG/PNG)", type=['jpg', 'png'])
 if uploaded_logo:
     st.sidebar.image(uploaded_logo, caption="Logo Preview", use_column_width=True)
@@ -65,10 +65,10 @@ if "produtos" not in st.session_state:
 
 def adicionar_produto():
     st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""})
-    st.rerun()  # Force rerun to update UI
+    st.rerun()
 
 def remover_produto():
-    if len(st.session_state.produtos) > 1:  # Keep at least one
+    if len(st.session_state.produtos) > 1:
         st.session_state.produtos.pop()
     st.rerun()
 
@@ -83,7 +83,7 @@ st.header("Itens da Proposta")
 produtos_editados = []
 
 for i, item in enumerate(st.session_state.produtos):
-    with st.expander(f"Produto {i+1}", expanded=True):  # Collapsible for better UX
+    with st.expander(f"Produto {i+1}", expanded=True):
         col1, col2 = st.columns([3, 1])
         with col1:
             nome = st.text_input(f"Nome do Produto", item["Produto"], key=f"nome_{item['id']}")
@@ -140,7 +140,7 @@ st.markdown(f"- **Prazo de Entrega:** {prazo_entrega}")
 st.markdown("- **Impostos:** Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.")
 
 # ----------------------------
-# Data em PT-BR (manual)
+# Data em PT-BR
 # ----------------------------
 meses_pt = {
     1: "janeiro", 2: "fevereiro", 3: "março", 4: "abril",
@@ -159,9 +159,9 @@ st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
 # ----------------------------
-# Função para gerar PDF com logo (agora suporta upload)
+# Função para gerar PDF com logo
 # ----------------------------
-@st.cache_data  # Cache para performance, mas invalidado por inputs
+@st.cache_data
 def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo=None):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
@@ -169,17 +169,16 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
 
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=20, fontName="Helvetica-Bold"))
-    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-Bold"))
+    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_CENTER, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))  # negrito + itálico
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=15, fontName="Helvetica"))
-    estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))  # Slightly smaller for fit
+    estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))
 
-    # Logo centralizado (from upload or skip)
+    # Logo centralizado
     if uploaded_logo:
         try:
-            # Save temp file from upload
-            logo_bytes = uploaded_logo.read()
             from reportlab.lib.utils import ImageReader
-            logo = Image(ImageReader(logo_bytes))
+            logo_bytes = uploaded_logo.read()
+            logo = Image(ImageReader(BytesIO(logo_bytes)))
             logo.drawHeight = 50
             logo.drawWidth = 120
             logo.hAlign = 'CENTER'
@@ -191,11 +190,8 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
     else:
         elementos.append(Spacer(1, 75))
 
-    # Título principal centralizado
     elementos.append(Paragraph("Proposta Comercial", estilos["CenterTitle"]))
     elementos.append(Spacer(1, 10))
-
-    # A/C
     elementos.append(Paragraph(f"A/C {cliente}", estilos["ACStyle"]))
     elementos.append(Spacer(1, 10))
 
@@ -228,19 +224,17 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
         elementos.append(Paragraph(linha, estilos["Normal"]))
     elementos.append(Spacer(1, 15))
 
-    # Itens da Proposta
+    # Itens da proposta
     elementos.append(Paragraph("Itens da Proposta", estilos["SectionTitle"]))
     elementos.append(Spacer(1, 10))
 
-    # Tabela de produtos (adjusted widths for better fit)
     if not df_final.empty:
         dados_tabela = [list(df_final.columns)]
         for row in df_final.values.tolist():
-            nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]  # Handle newlines
+            nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        col_widths = [140, 60, 90, 120, 70]  # Tweaked for overflow prevention
-
+        col_widths = [140, 60, 90, 120, 70]
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
         estilo = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
@@ -249,7 +243,7 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
             ("FONTSIZE", (0,0), (-1,0), 9),
             ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
-            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),  # Vertical align
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
         ])
         tabela.setStyle(estilo)
         elementos.append(tabela)
@@ -279,7 +273,7 @@ def gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pag
     return buffer
 
 # ----------------------------
-# Botão para download do PDF
+# Botão de download do PDF
 # ----------------------------
 if st.button("Baixar Proposta em PDF", type="primary"):
     pdf_buffer = gerar_pdf_com_logo(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta, uploaded_logo)
