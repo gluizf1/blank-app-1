@@ -264,10 +264,32 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 # ----------------------------
 # Download automático do PDF
 # ----------------------------
+# ----------------------------
+# Botão vermelho para download do PDF
+# ----------------------------
 pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
+
+st.markdown("""
+    <style>
+    .download-btn > button {
+        background-color: #e74c3c;
+        color: white;
+        height: 40px;
+        width: 250px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.download_button(
-    label="Baixar Proposta em PDF", 
+    label="Baixar Proposta em PDF",
     data=pdf_buffer,
     file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
-    mime="application/pdf"
+    mime="application/pdf",
+    key="download_pdf",
+    help="Clique para baixar o PDF",
+    args=None,
+    kwargs=None
 )
+
