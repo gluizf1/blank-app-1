@@ -188,65 +188,44 @@ else:
 # ----------------------------
 col1, col2, col3 = st.columns(3)
 
-# Adicionar Produto (verde)
+# ----------------------------
+# Botões de adicionar/remover/limpar com cores independentes
+# ----------------------------
+col1, col2, col3 = st.columns(3)
+
 with col1:
-    if st.button("➕ Adicionar Produto"):
+    if st.markdown(
+        """
+        <form action="#" target="_self">
+            <input type="submit" value="➕ Adicionar Produto" 
+            style="background-color:#4CAF50;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
+        </form>
+        """, unsafe_allow_html=True
+    ):
         adicionar_produto()
-    st.markdown(
-        """
-        <style>
-        div.stButton > button:first-child {
-            background-color: #32CD32;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-# Remover Último (laranja)
 with col2:
-    if st.button("➖ Remover Último", disabled=len(st.session_state.produtos) <= 1):
+    if st.markdown(
+        f"""
+        <form action="#" target="_self">
+            <input type="submit" value="➖ Remover Último" {'disabled' if len(st.session_state.produtos) <= 1 else ''} 
+            style="background-color:#FFA500;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
+        </form>
+        """, unsafe_allow_html=True
+    ):
         remover_produto()
-    st.markdown(
-        """
-        <style>
-        div.stButton > button:first-child {
-            background-color: #FFA500;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
-# Limpar Todos (vermelho)
 with col3:
-    if st.button("🗑️ Limpar Todos"):
-        limpar_produtos()
-    st.markdown(
+    if st.markdown(
         """
-        <style>
-        div.stButton > button:first-child {
-            background-color: #FF0000;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+        <form action="#" target="_self">
+            <input type="submit" value="🗑️ Limpar Todos" 
+            style="background-color:#f44336;color:white;padding:10px 25px;border:none;border-radius:5px;font-size:14px;cursor:pointer;">
+        </form>
+        """, unsafe_allow_html=True
+    ):
+        limpar_produtos()
+
 
 # ----------------------------
 # Resumo e total
