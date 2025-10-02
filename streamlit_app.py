@@ -162,7 +162,7 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     estilos = getSampleStyleSheet()
     estilos.add(ParagraphStyle(name="CenterTitle", alignment=TA_CENTER, fontSize=22, leading=26, spaceAfter=20, fontName="Helvetica-Bold"))
-    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_LEFT, fontSize=14, leading=18, spaceAfter=10, fontName="Helvetica-BoldOblique"))
+    estilos.add(ParagraphStyle(name="SectionTitle", alignment=TA_LEFT, fontSize=14, leading=18, spaceAfter=5, fontName="Helvetica-BoldOblique"))
     estilos.add(ParagraphStyle(name="ACStyle", fontSize=14, leading=20, spaceAfter=15, fontName="Helvetica"))
     estilos.add(ParagraphStyle(name="CellStyle", fontSize=9, leading=11))
 
