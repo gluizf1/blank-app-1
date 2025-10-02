@@ -147,9 +147,7 @@ mes = meses_pt[data_proposta.month]
 ano = data_proposta.year
 data_formatada = f"{dia} de {mes} de {ano}"
 
-st.markdown("\n\n\n")
-st.markdown(f"**Rio de Janeiro, {data_formatada}.**")
-st.markdown("\n\n\n")
+st.markdown(f"\n\n\n**Rio de Janeiro, {data_formatada}.**")
 st.markdown("**Gustavo Luiz Freitas de Sousa**")
 st.markdown("CPF: 148.288.697-94")
 
@@ -224,7 +222,8 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
             nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        col_widths = [140, 60, 90, 120, 70]
+        # Ajuste de largura das colunas para Quantidade e Preço Unitário
+        col_widths = [140, 50, 70, 130, 70]
         tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
         estilo = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
@@ -263,13 +262,15 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     return buffer
 
 # ----------------------------
-# Botão de download do PDF
+# Download automático do PDF
 # ----------------------------
 if st.button("Baixar Proposta em PDF", type="primary"):
     pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
     st.download_button(
-        label="📥 Download PDF",
+        label="",
         data=pdf_buffer,
         file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
-        mime="application/pdf"
+        mime="application/pdf",
+        key="download_pdf",
+        use_container_width=True
     )
