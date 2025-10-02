@@ -184,15 +184,13 @@ else:
 # ----------------------------
 # Botões de adicionar/remover/limpar
 # ----------------------------
-def adicionar_produto():
-    st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""})
-
-def remover_produto():
-    if len(st.session_state.produtos) > 1:
-        st.session_state.produtos.pop()
-
-def limpar_produtos():
-    st.session_state.produtos = [{"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""}]
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.button("➕ Adicionar Produto", on_click=adicionar_produto)
+with col2:
+    st.button("➖ Remover Último", on_click=remover_produto, disabled=len(st.session_state.produtos) <= 1)
+with col3:
+    st.button("🗑️ Limpar Todos", on_click=limpar_produtos)
 
 # ----------------------------
 # Resumo e total
