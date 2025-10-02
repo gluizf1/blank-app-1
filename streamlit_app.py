@@ -55,7 +55,7 @@ st.markdown("""
 # ----------------------------
 if "produtos" not in st.session_state:
     st.session_state.produtos = [
-        {"id": str(uuid.uuid4()), "Produto": "", "Quant.": , "Preço Unit.": , "Observações": ""}
+        {"id": str(uuid.uuid4()), "Produto": "", "Quant.": "", "Preço Unit.": "", "Observações": ""}
     ]
 
 def adicionar_produto():
