@@ -221,8 +221,21 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
             nova_linha = [Paragraph(str(item).replace('\n', ' '), estilos["CellStyle"]) for item in row]
             dados_tabela.append(nova_linha)
 
-        col_widths = [140, 50, 70, 130, 70]
-        tabela = Table(dados_tabela, colWidths=col_widths, repeatRows=1)
+        # Largura proporcional das colunas
+        colunas = list(df_final.columns)
+        largura_total = A4[0] - 80  # margens
+        larguras = []
+        for col in colunas:
+            if col in ["Produto", "Observações"]:
+                larguras.append(largura_total * 0.3)
+            elif col == "Preço Unitário (R$)":
+                larguras.append(largura_total * 0.15)
+            elif col == "Quantidade":
+                larguras.append(largura_total * 0.1)
+            else:  # Total (R$)
+                larguras.append(largura_total * 0.15)
+
+        tabela = Table(dados_tabela, colWidths=larguras, repeatRows=1)
         estilo = TableStyle([
             ("BOX", (0,0), (-1,-1), 1, colors.black),
             ("INNERGRID", (0,0), (-1,-1), 0.5, colors.black),
