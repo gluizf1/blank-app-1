@@ -55,11 +55,11 @@ st.markdown("""
 # ----------------------------
 if "produtos" not in st.session_state:
     st.session_state.produtos = [
-        {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quantidade": 1, "Preço Unitário (R$)": 100.0, "Observações": ""}
+        {"id": str(uuid.uuid4()), "Produto": "Produto A", "Quant.": 1, "Preço Unit.": 100.0, "Observações": ""}
     ]
 
 def adicionar_produto():
-    st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""})
+    st.session_state.produtos.append({"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""})
     st.rerun()
 
 def remover_produto():
@@ -68,7 +68,7 @@ def remover_produto():
     st.rerun()
 
 def limpar_produtos():
-    st.session_state.produtos = [{"id": str(uuid.uuid4()), "Produto": "", "Quantidade": 1, "Preço Unitário (R$)": 0.0, "Observações": ""}]
+    st.session_state.produtos = [{"id": str(uuid.uuid4()), "Produto": "", "Quant.": 1, "Preço Unit.": 0.0, "Observações": ""}]
     st.rerun()
 
 # ----------------------------
@@ -84,22 +84,22 @@ for i, item in enumerate(st.session_state.produtos):
             nome = st.text_input(f"Nome do Produto", item["Produto"], key=f"nome_{item['id']}")
             obs = st.text_input(f"Observações", item["Observações"], key=f"obs_{item['id']}")
         with col2:
-            qtd = st.number_input("Quantidade", min_value=0.0, value=float(item["Quantidade"]), key=f"qtd_{item['id']}")
-            preco = st.number_input("Preço Unitário (R$)", min_value=0.0, value=float(item["Preço Unitário (R$)"]), key=f"preco_{item['id']}")
+            qtd = st.number_input("Quant.", min_value=0.0, value=float(item["Quant."]), key=f"qtd_{item['id']}")
+            preco = st.number_input("Preço Unit.", min_value=0.0, value=float(item["Preço Unit."]), key=f"preco_{item['id']}")
 
         total = qtd * preco
         st.markdown(f"**Total do Item: R$ {total:.2f}**")
 
         produtos_editados.append({
             "Produto": nome,
-            "Quantidade": qtd,
-            "Preço Unitário (R$)": preco,
+            "Quant.": qtd,
+            "Preço Unit.": preco,
             "Observações": obs,
             "Total (R$)": total
         })
 
 st.session_state.produtos = [
-    {**old, "Produto": new["Produto"], "Quantidade": new["Quantidade"], "Preço Unitário (R$)": new["Preço Unitário (R$)"], "Observações": new["Observações"]}
+    {**old, "Produto": new["Produto"], "Quant.": new["Quant."], "Preço Unit.": new["Preço Unit."], "Observações": new["Observações"]}
     for old, new in zip(st.session_state.produtos, produtos_editados)
 ]
 
@@ -118,6 +118,13 @@ with col3:
 # Resumo da proposta
 # ----------------------------
 df_final = pd.DataFrame(produtos_editados)
+
+# Garantir que as colunas já estão com os nomes corretos
+df_final = df_final.rename(columns={
+    "Preço Unit.": "Preço Unit.",
+    "Quant.": "Quant."
+})
+
 st.subheader("Resumo da Proposta")
 st.dataframe(df_final)
 
@@ -228,10 +235,10 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
         for col in colunas:
             if col in ["Produto", "Observações"]:
                 larguras.append(largura_total * 0.3)
-            elif col == "Preço Unitário (R$)":
-                larguras.append(largura_total * 0.2)
-            elif col == "Quantidade":
-                larguras.append(largura_total * 0.11)
+            elif col == "Preço Unit.":
+                larguras.append(largura_total * 0.15)
+            elif col == "Quant.":
+                larguras.append(largura_total * 0.1)
             else:  # Total (R$)
                 larguras.append(largura_total * 0.15)
 
@@ -262,10 +269,9 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     elementos.append(Paragraph("Impostos: Nos preços estão incluídos todos os custos indispensáveis à perfeita execução do objeto.", estilos["Normal"]))
     elementos.append(Spacer(1, 40))
 
-    # Data + assinatura (sem CPF)
+    # Data + assinatura
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
 
-    # Assinatura
     try:
         assinatura = Image("assinatura.png")
         assinatura.drawHeight = 50
@@ -275,7 +281,6 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
     except Exception as e:
         st.error(f"Erro ao carregar a assinatura: {e}")
 
-    # Nome abaixo da assinatura
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
 
     doc.build(elementos)
