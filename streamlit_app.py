@@ -264,13 +264,10 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 # ----------------------------
 # Download automático do PDF
 # ----------------------------
-if st.button("Baixar Proposta em PDF", type="primary"):
-    pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
-    st.download_button(
-        label="",
-        data=pdf_buffer,
-        file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
-        mime="application/pdf",
-        key="download_pdf",
-        use_container_width=True
-    )
+pdf_buffer = gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
+st.download_button(
+    label="Baixar Proposta em PDF", 
+    data=pdf_buffer,
+    file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
+    mime="application/pdf"
+)
