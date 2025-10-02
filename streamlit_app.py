@@ -389,7 +389,7 @@ def gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagame
 # Gerar bytes do PDF com os dados atuais (se df_final estiver vazio, ainda gera um PDF com a mensagem)
 pdf_bytes = gerar_pdf_bytes(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta)
 st.download_button(
-    label="📥 Baixar Proposta em PDF",
+    label="Baixar Proposta em PDF",
     data=pdf_bytes,
     file_name=f"proposta_{cliente.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf",
     mime="application/pdf"
