@@ -196,7 +196,7 @@ with col1:
         """
         <style>
         div.stButton > button:first-child {
-            background-color: #4CAF50;
+            background-color: #32CD32;
             color: white;
             padding: 8px 20px;
             border: none;
@@ -236,7 +236,7 @@ with col3:
         """
         <style>
         div.stButton > button:first-child {
-            background-color: #f44336;
+            background-color: #FF0000;
             color: white;
             padding: 8px 20px;
             border: none;
