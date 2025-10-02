@@ -151,7 +151,7 @@ st.markdown(f"\n\n\n**Rio de Janeiro, {data_formatada}.**")
 st.markdown("**Gustavo Luiz Freitas de Sousa**")
 
 # ----------------------------
-# Função para gerar PDF com logo fixa
+# Função para gerar PDF com logo fixa e assinatura
 # ----------------------------
 @st.cache_data
 def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, prazo_entrega, validade_proposta):
@@ -251,7 +251,18 @@ def gerar_pdf(cliente, data_formatada, df_final, total_geral, prazo_pagamento, p
 
     # Data + assinatura (sem CPF)
     elementos.append(Paragraph(f"Rio de Janeiro, {data_formatada}.", estilos["Normal"]))
-    elementos.append(Spacer(1, 50))
+
+    # Assinatura
+    try:
+        assinatura = Image("assinatura.png")
+        assinatura.drawHeight = 50
+        assinatura.drawWidth = 120
+        assinatura.hAlign = 'LEFT'
+        elementos.append(assinatura)
+    except Exception as e:
+        st.error(f"Erro ao carregar a assinatura: {e}")
+
+    # Nome abaixo da assinatura
     elementos.append(Paragraph("Gustavo Luiz Freitas de Sousa", estilos["Normal"]))
 
     doc.build(elementos)
